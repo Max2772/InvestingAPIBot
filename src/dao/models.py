@@ -1,28 +1,44 @@
 import os
-
-from sqlalchemy import Column, String, Boolean, DateTime, create_engine, BigInteger
 from datetime import datetime, UTC
-
+from sqlalchemy import Column, String, Boolean, DateTime, create_engine, BigInteger, Integer, ForeignKey, Float
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
-from sqlalchemy.orm import declarative_base, sessionmaker
+from sqlalchemy.orm import declarative_base, sessionmaker, relationship
 
 Base = declarative_base()
 
 class User(Base):
     __tablename__ = 'invsetingapibot_users'
 
-    telegram_id = Column(BigInteger, primary_key=True)  # ID пользователя в Telegram
-    username = Column(String(50), nullable=True)  # @username (может быть None, если скрыт)
-    first_name = Column(String(50), nullable=False)  # Имя
-    last_name = Column(String(50), nullable=True)  # Фамилия (может быть None)
-    phone = Column(String(20), nullable=True)  # Телефон (если пользователь его предоставит)
-    is_admin = Column(Boolean, default=False)  # Админ ли?
-    is_active = Column(Boolean, default=True)  # Активен ли аккаунт?
-    registered_at = Column(DateTime(timezone=True), default=datetime.now(tz=UTC))  # Дата регистрации
+    id = Column(BigInteger, primary_key=True)
+    telegram_id = Column(BigInteger, unique=True)
+    username = Column(String(50), nullable=True)
+    first_name = Column(String(50), nullable=False)
+    last_name = Column(String(50), nullable=True)
+    phone = Column(String(20), nullable=True)
+    is_admin = Column(Boolean, default=False)
+    is_active = Column(Boolean, default=True)
+    registered_at = Column(DateTime(timezone=True), default=datetime.now(tz=UTC))
+
+    portfolios = relationship("Portfolio", back_populates="user")
 
     def __repr__(self):
         return f"<User(id={self.telegram_id}, username='{self.username}')>"
 
+class Portfolio(Base):
+    __tablename__ = 'invsetingapibot_portfolios'
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(BigInteger, ForeignKey('invsetingapibot_users.telegram_id'), nullable=False)
+    asset_type = Column(String)
+    asset_name = Column(String)
+    quantity = Column(Float)
+    buy_price = Column(Float)
+    app_id = Column(Integer, nullable=True)
+
+    user = relationship("User", back_populates="portfolios")
+
+    def __repr__(self):
+        return f"<Portfolio(id={self.id}, user_id={self.user_id}, name='{self.asset_name}')>"
 
 engine = create_engine(
     os.getenv("INVESTINGAPIBOT_DATABASE_URL", "sqlite:///InvestingAPIBot.db"),
