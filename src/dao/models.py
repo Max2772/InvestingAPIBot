@@ -9,8 +9,7 @@ Base = declarative_base()
 class User(Base):
     __tablename__ = 'invsetingapibot_users'
 
-    id = Column(BigInteger, primary_key=True)
-    telegram_id = Column(BigInteger, unique=True)
+    telegram_id = Column(BigInteger, unique=True, primary_key=True)
     username = Column(String(50), nullable=True)
     first_name = Column(String(50), nullable=False)
     last_name = Column(String(50), nullable=True)
@@ -26,9 +25,7 @@ class User(Base):
 
 class Portfolio(Base):
     __tablename__ = 'invsetingapibot_portfolios'
-
-    id = Column(Integer, primary_key=True)
-    user_id = Column(BigInteger, ForeignKey('invsetingapibot_users.telegram_id'), nullable=False)
+    user_id = Column(BigInteger, ForeignKey('invsetingapibot_users.telegram_id'), nullable=False, primary_key=True)
     asset_type = Column(String)
     asset_name = Column(String)
     quantity = Column(Float)
