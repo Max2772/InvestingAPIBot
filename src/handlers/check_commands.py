@@ -57,13 +57,8 @@ async def command_crypto_handler(message: Message) -> None:
 
 @dp.message(Command('steam'))
 async def command_steam_handler(message: Message) -> None:
-    args = message.text.split()[1:]
-    if not args:
-        await message.answer("Please provide the app_id and the full item's name from steamcommunity.com, e.g., /steam 730 Glove Case")
-        return
-
-    pattern = re.compile(r"^/steam\s(\d+)\s(.+)$")
-    match = pattern.match(message.text)
+    pattern = re.compile(r"^/steam\s+(\d+)\s+(.+)$")
+    match = pattern.match(message.text.strip())
     if not match:
         await message.answer("Please provide a valid app_id and steam market name!")
         return
@@ -82,7 +77,8 @@ async def command_steam_handler(message: Message) -> None:
                     response = await client.get(url)
                     response.raise_for_status()
                     data = response.json()
-                    await message.answer(f"Steam game: {app_id}, Steam item {market_name}: {html.bold(data.get('price', 'X'))}$")
+                    price = data.get('price', 0.0)
+                    await message.answer(f"Steam game: {app_id}, Steam item {market_name}: {html.bold(price)}$")
                 except (httpx.HTTPError, KeyError, ValueError) as e:
                     await message.answer(f"Failed to fetch steam item {market_name} from {app_id}")
 

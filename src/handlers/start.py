@@ -1,11 +1,11 @@
-from aiogram.filters import CommandStart
+from aiogram.filters import Command
 from aiogram.types import Message
 from aiogram import html
 from src.common import dp
 from src.dao.models import AsyncSessionLocal, User
 
-@dp.message(CommandStart())
-async def command_start_handler(message: Message) -> None:
+@dp.message(Command('start', 'register'))
+async def command_register_handler(message: Message) -> None:
     async with AsyncSessionLocal() as session:
         user = await session.get(User, message.from_user.id)
         if not user:
