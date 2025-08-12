@@ -5,9 +5,12 @@ from aiogram.filters import Command
 from aiogram.types import Message
 from src.common import dp, API_BASE_URL
 from src.dao.models import AsyncSessionLocal, User, Portfolio
+from src.utils import (get_logger)
+
+logger = get_logger()
 
 @dp.message(Command('add_stock'))
-async def command_add_stock_handler(message: Message) -> None:
+async def add_stock_handler(message: Message) -> None:
     pattern = re.compile(r"^/add_stock\s+([A-Za-z]+)\s+(\d+\.?\d*)$")
     match = pattern.match(message.text.strip())
     if not match:
@@ -42,10 +45,11 @@ async def command_add_stock_handler(message: Message) -> None:
 
                     await message.answer(f"Added {amount} {ticker} at {html.bold(price)}$")
                 except (httpx.HTTPError, KeyError, ValueError) as e:
+                    logger.error(f"Error adding stock {ticker}: {e}")
                     await message.answer(f"Failed to add stock {ticker}")
 
 @dp.message(Command('add_crypto'))
-async def command_add_crypto_handler(message: Message) -> None:
+async def add_crypto_handler(message: Message) -> None:
     pattern = re.compile(r"^/add_crypto\s+([A-Za-z]+)\s+(\d+\.?\d*)$")
     match = pattern.match(message.text.strip())
     if not match:
@@ -80,10 +84,11 @@ async def command_add_crypto_handler(message: Message) -> None:
 
                     await message.answer(f"Added {amount} {coin} at {html.bold(price)}$")
                 except (httpx.HTTPError, KeyError, ValueError) as e:
+                    logger.error(f"Error adding crypto {coin}: {e}")
                     await message.answer(f"Failed to add crypto {coin}")
 
 @dp.message(Command('add_steam'))
-async def command_add_steam_handler(message: Message) -> None:
+async def add_steam_handler(message: Message) -> None:
     pattern = re.compile(r"^/add_steam\s+(\d+)\s+(.+)\s+(\d+)$")
     match = pattern.match(message.text.strip())
     if not match:
@@ -120,4 +125,5 @@ async def command_add_steam_handler(message: Message) -> None:
 
                     await message.answer(f"Added {amount} {market_name} at {html.bold(price)}$")
                 except (httpx.HTTPError, KeyError, ValueError) as e:
+                    logger.error(f"Error adding Steam item {market_name}, app_id {app_id}: {e}")
                     await message.answer(f"Failed to add Steam item {market_name}, app_id {app_id}")

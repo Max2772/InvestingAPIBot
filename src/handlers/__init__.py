@@ -1,13 +1,15 @@
-from src.handlers.start import command_register_handler
-from src.handlers.help import command_help_handler
-from src.handlers.check_commands import command_stock_handler, command_crypto_handler, command_steam_handler
-from src.handlers.add_commands import command_add_stock_handler, command_add_crypto_handler, command_add_steam_handler
+from src.handlers.start import register_handler
+from src.handlers.help import help_handler
+from src.handlers.check_commands import stock_handler, crypto_handler, steam_handler
+from src.handlers.add_commands import add_stock_handler, add_crypto_handler, add_steam_handler
+from src.handlers.remove_commands import remove_stock_handler
 from src.handlers.echo import echo_handler
 
 __all__ = [
-    "command_register_handler",
-    "command_help_handler",
-    "command_stock_handler", "command_crypto_handler", "command_steam_handler",
-    "command_add_stock_handler", "command_add_crypto_handler", "command_add_steam_handler",
+    "register_handler",
+    "help_handler",
+    "stock_handler", "crypto_handler", "steam_handler",
+    "add_stock_handler", "add_crypto_handler", "add_steam_handler",
+    "remove_stock_handler",
     "echo_handler"
 ]

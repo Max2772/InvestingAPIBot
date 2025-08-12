@@ -1,5 +1,4 @@
 import asyncio
-import logging
 import argparse
 from src import handlers # NoQa
 from src.utils import (setup_logger)

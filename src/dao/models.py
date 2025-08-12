@@ -25,7 +25,8 @@ class User(Base):
 
 class Portfolio(Base):
     __tablename__ = 'invsetingapibot_portfolios'
-    user_id = Column(BigInteger, ForeignKey('invsetingapibot_users.telegram_id'), nullable=False, primary_key=True)
+    id = Column(BigInteger, unique=True, primary_key=True, autoincrement=True)
+    user_id = Column(BigInteger, ForeignKey('invsetingapibot_users.telegram_id'), nullable=False)
     asset_type = Column(String)
     asset_name = Column(String)
     quantity = Column(Float)

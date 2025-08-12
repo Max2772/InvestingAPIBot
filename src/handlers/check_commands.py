@@ -5,15 +5,19 @@ from aiogram.filters import Command
 from aiogram.types import Message
 from src.common import dp, API_BASE_URL
 from src.dao.models import AsyncSessionLocal, User
+from src.utils import get_logger
+
+logger = get_logger()
 
 @dp.message(Command('stock'))
-async def command_stock_handler(message: Message) -> None:
-    arg = message.text.split()[1:]
-    if not arg:
+async def stock_handler(message: Message) -> None:
+    pattern = re.compile(r"^/stock\s+(A-Za-z0-9.+)$")
+    match = pattern.match(message.text.strip())
+    if not match:
         await message.answer("Please provide a stock ticker, e.g., /stock AMD")
         return
 
-    ticker = arg[0].upper()
+    ticker = match.group(1).upper()
 
     async with AsyncSessionLocal() as session:
         user = await session.get(User, message.from_user.id)
@@ -28,16 +32,18 @@ async def command_stock_handler(message: Message) -> None:
                     data = response.json()
                     await message.answer(f"Stock ticker {ticker}: {html.bold(data.get('price', 'X'))}$")
                 except (httpx.HTTPError, KeyError, ValueError) as e:
+                    logger.error(f"Failed to get stock ticker {ticker}: {e}")
                     await message.answer(f"Failed to fetch stock {ticker}")
 
 @dp.message(Command('crypto'))
-async def command_crypto_handler(message: Message) -> None:
-    arg = message.text.split()[1:]
-    if not arg:
-        await message.answer("Please provide the crypto's fullname or abbreviation, e.g., /crypto Bitcoin, /crypto BTC")
+async def crypto_handler(message: Message) -> None:
+    pattern = re.compile(r"^/crypto\s+(A-Za-z0-9.+)$")
+    match = pattern.match(message.text.strip())
+    if not match:
+        await message.answer("Please provide a coin name, e.g., /crypto BTC, /crypto Solana")
         return
 
-    coin = arg[0].upper()
+    coin = match.group(1)
 
     async with AsyncSessionLocal() as session:
         user = await session.get(User, message.from_user.id)
@@ -52,11 +58,11 @@ async def command_crypto_handler(message: Message) -> None:
                     data = response.json()
                     await message.answer(f"Coin {coin}: {html.bold(data.get('price', 'X'))}$")
                 except (httpx.HTTPError, KeyError, ValueError) as e:
-
+                    logger.error(f"Failed to get crypto {coin}: {e}")
                     await message.answer(f"Failed to fetch crypto {coin}")
 
 @dp.message(Command('steam'))
-async def command_steam_handler(message: Message) -> None:
+async def steam_handler(message: Message) -> None:
     pattern = re.compile(r"^/steam\s+(\d+)\s+(.+)$")
     match = pattern.match(message.text.strip())
     if not match:
@@ -80,5 +86,6 @@ async def command_steam_handler(message: Message) -> None:
                     price = data.get('price', 0.0)
                     await message.answer(f"Steam game: {app_id}, Steam item {market_name}: {html.bold(price)}$")
                 except (httpx.HTTPError, KeyError, ValueError) as e:
+                    logger.error(f"Failed to get Steam item {market_name}, app_id {app_id}: {e}")
                     await message.answer(f"Failed to fetch steam item {market_name} from {app_id}")
 
