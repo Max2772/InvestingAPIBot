@@ -1,6 +1,6 @@
 import os
 from datetime import datetime, UTC
-from sqlalchemy import Column, String, Boolean, DateTime, create_engine, BigInteger, Integer, ForeignKey, Float
+from sqlalchemy import Column, String, Boolean, DateTime, create_engine, BigInteger, Integer, ForeignKey, Float, Numeric
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import declarative_base, sessionmaker, relationship
 
@@ -29,8 +29,8 @@ class Portfolio(Base):
     user_id = Column(BigInteger, ForeignKey('invsetingapibot_users.telegram_id'), nullable=False)
     asset_type = Column(String)
     asset_name = Column(String)
-    quantity = Column(Float)
-    buy_price = Column(Float)
+    quantity = Column(Numeric(precision=38, scale=18))
+    buy_price = Column(Numeric(precision=38, scale=18))
     purchase_date = Column(DateTime, default=datetime.now(tz=UTC))
     app_id = Column(Integer, nullable=True)
 
