@@ -5,7 +5,7 @@ from aiogram.filters import Command
 from aiogram.types import Message
 from src.common import dp, API_BASE_URL
 from src.dao.models import AsyncSessionLocal, User
-from src.utils import get_logger
+from src import (get_logger)
 
 logger = get_logger()
 

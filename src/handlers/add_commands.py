@@ -8,7 +8,7 @@ from sqlalchemy import select, and_
 
 from src.common import dp, API_BASE_URL
 from src.dao.models import AsyncSessionLocal, User, Portfolio
-from src.utils import (get_logger)
+from src import (get_logger)
 
 logger = get_logger()
 

@@ -6,7 +6,7 @@ from sqlalchemy import select, and_
 from sqlalchemy.exc import SQLAlchemyError
 from src.common import dp
 from src.dao.models import AsyncSessionLocal, User, Portfolio
-from src.utils import get_logger
+from src import (get_logger)
 
 logger = get_logger()
 

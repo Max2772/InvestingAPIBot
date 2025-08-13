@@ -1,6 +1,6 @@
 from aiogram.types import Message
 from src.common import dp
-from src.utils import get_logger
+from src import (get_logger)
 
 logger = get_logger()
 

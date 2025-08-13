@@ -1,7 +1,7 @@
 import asyncio
 import argparse
 from src import handlers # NoQa
-from src.utils import (setup_logger)
+from src import (setup_logger)
 from src.common import bot, dp
 
 async def main() -> None:
