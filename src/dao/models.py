@@ -18,7 +18,7 @@ class User(Base):
     is_active = Column(Boolean, default=True)
     registered_at = Column(DateTime(timezone=True), default=datetime.now(tz=UTC))
 
-    portfolios = relationship("Portfolio", back_populates="user")
+    portfolios = relationship("Portfolio", back_populates="user", lazy="selectin")
 
     def __repr__(self):
         return f"<User(id={self.telegram_id}, username='{self.username}')>"
@@ -30,11 +30,11 @@ class Portfolio(Base):
     asset_type = Column(String)
     asset_name = Column(String)
     quantity = Column(Numeric(precision=38, scale=18))
-    buy_price = Column(Numeric(precision=38, scale=18))
+    buy_price = Column(Numeric(precision=38, scale=2))
     purchase_date = Column(DateTime, default=datetime.now(tz=UTC))
     app_id = Column(Integer, nullable=True)
 
-    user = relationship("User", back_populates="portfolios")
+    user = relationship("User", back_populates="portfolios", lazy="selectin")
 
     def __repr__(self):
         return f"<Portfolio(id={self.id}, user_id={self.user_id}, name='{self.asset_name}')>"
