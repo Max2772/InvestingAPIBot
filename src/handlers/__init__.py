@@ -4,7 +4,7 @@ from src.handlers.check_commands import stock_handler, crypto_handler, steam_han
 from src.handlers.add_commands import add_stock_handler, add_crypto_handler, add_steam_handler
 from src.handlers.remove_commands import remove_stock_handler, remove_crypto_handler, remove_steam_handler
 from src.handlers.portfolio import portfolio_handler
-from src.handlers.echo import echo_handler
+from src.handlers.history import history_handler
 
 __all__ = [
     "register_handler",
@@ -13,5 +13,5 @@ __all__ = [
     "add_stock_handler", "add_crypto_handler", "add_steam_handler",
     "remove_stock_handler", "remove_crypto_handler", "remove_steam_handler",
     "portfolio_handler",
-    "echo_handler"
+    "history_handler"
 ]

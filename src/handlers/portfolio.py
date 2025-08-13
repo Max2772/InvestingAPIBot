@@ -12,22 +12,23 @@ from src.common import API_BASE_URL
 
 logger = get_logger()
 
-PORTFOLIO_SETTINGS = ['default', 'stocks', 'crypto', 'steam', 'total']
+PORTFOLIO_SETTINGS = ['all', 'stocks', 'crypto', 'steam']
 
 mode_titles = {
-    'default': 'Your Portfolio',
+    'all': 'Your Portfolio',
     'stock': 'Your Portfolio (Stocks)',
     'crypto': 'Your Portfolio (Crypto)',
     'steam': 'Your Portfolio (Steam)',
-    'total': 'Your Portfolio (Summary)'
 }
-
 
 @dp.message(Command('portfolio'))
 async def portfolio_handler(message: Message) -> None:
-    pattern = re.compile(r"^/portfolio\s+(stocks|crypto|steam|total)$")
+    pattern = re.compile(r"^/portfolio\s+(all|stocks|crypto|steam)$")
     match = re.match(pattern, message.text.strip())
-    mode = match.group(1) if match and match.group(1) in PORTFOLIO_SETTINGS else 'default'
+    mode = match.group(1) if match and match.group(1) in PORTFOLIO_SETTINGS else 'all'
+    if not match:
+        await message.answer("Please provide a parameter, e.g., /portfolio all")
+        return
 
     if mode == 'stocks':
         mode = 'stock'
@@ -49,28 +50,39 @@ async def portfolio_handler(message: Message) -> None:
             steam_text = "<b>🎮  Steam Items</b>\n"
 
 
-            total_old_value = Decimal(0)
-            total_current_value = Decimal(0)
+            total_old_value = Decimal('0')
+            total_current_value = Decimal('0')
 
             async with httpx.AsyncClient() as client:
                 for portfolio in user.portfolios:
-                    if portfolio.asset_type == mode or mode in ('default', 'total'):
-                        buy_price = portfolio.buy_price
+                    if portfolio.asset_type == mode or mode == 'all':
+                        buy_price = Decimal(str(portfolio.buy_price))
+                        quantity = Decimal(str(portfolio.quantity))
                         asset_type = portfolio.asset_type
                         asset_name = portfolio.asset_name
                         app_id = portfolio.app_id
 
-                        url = f"{API_BASE_URL}/{asset_type}/{asset_name}" if app_id is None else f"{API_BASE_URL}/{asset_type}/{app_id}/{asset_name}"
-                        response = await client.get(url)
-                        response.raise_for_status()
-                        data = response.json()
-                        current_price = Decimal(str(data.get('price', 0)))
-                        total_old_value += buy_price * portfolio.quantity
-                        total_current_value += current_price * portfolio.quantity
-                        growth = ((current_price - buy_price ) / buy_price) * 100
+                        try:
+                            url = f"{API_BASE_URL}/{asset_type}/{asset_name}" if app_id is None else f"{API_BASE_URL}/{asset_type}/{app_id}/{asset_name}"
+                            response = await client.get(url)
+                            response.raise_for_status()
+                            data = response.json()
+                            current_price = Decimal(str(data.get('price', 0)))
+                            if current_price == 0:
+                                logger.warning(f"No valid price for {asset_type}:{asset_name}")
+                                continue
+                        except Exception as e:
+                            logger.error(f"Error fetching price for {asset_type}:{asset_name}: {e}")
+                            await message.answer(f"Failed to fetch price for {asset_name}.")
+                            continue
 
+                        total_old_value += buy_price * quantity
+                        total_current_value += current_price * quantity
+                        growth = ((current_price - buy_price) / buy_price) * 100 if buy_price != 0 else Decimal('0')
 
-                        asset_text = f"<b>{asset_name}</b>: {portfolio.quantity:.2f} at avg. price ${buy_price}, now ${current_price}, value ${buy_price * portfolio.quantity:.2f} ({profit_sign(growth)}{growth:.2f}% {profit_emoji(growth)})\n"
+                        asset_text = (f"<b>{asset_name}</b>: {portfolio.quantity:.2f} at avg. price ${buy_price:.2f},"
+                                      f" now ${current_price:.2f}, value ${buy_price * portfolio.quantity:.2f}"
+                                      f" ({profit_sign(growth)}{growth:.2f}% {profit_emoji(growth)})\n")
 
                         if asset_type == 'stock':
                             stock_text += asset_text
@@ -79,14 +91,15 @@ async def portfolio_handler(message: Message) -> None:
                         else:
                             steam_text += asset_text
 
-            if mode == 'default':
-                portfolio_text += stock_text + '\n' + crypto_text + '\n' + steam_text + '\n'
-            elif mode == 'stock':
+
+            if mode == 'stock':
                 portfolio_text += stock_text + '\n'
             elif mode == 'crypto':
                 portfolio_text += crypto_text + '\n'
             elif mode == 'steam':
                 portfolio_text += steam_text + '\n'
+            else:
+                portfolio_text += stock_text + '\n' + crypto_text + '\n' + steam_text + '\n'
 
             total_percent_change = ((total_current_value - total_old_value) / total_old_value) * 100
             portfolio_text += ("◇───────────────────────────────────────────◇\n\n"
