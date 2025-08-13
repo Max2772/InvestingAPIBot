@@ -28,12 +28,29 @@ async def portfolio_handler(message: Message) -> None:
             total_old_value = Decimal(0)
             total_current_value = Decimal(0)
 
+            total_stock_invested = Decimal(0)
+            total_stock_profit = Decimal(0)
+            total_crypto_invested = Decimal(0)
+            total_crypto_profit = Decimal(0)
+            total_steam_invested = Decimal(0)
+            total_steam_profit = Decimal(0)
+
+            stock_text = "<b>🗠  Stocks</b>\n"
+            crypto_text = "<b>₿  Crypto</b>\n"
+            steam_text = "<b>🎮  Steam Items</b>\n"
+
+            sort_order = {"stock": 1, "crypto": 2, "steam": 3}
+            portfolios_sorted = sorted(user.portfolios, key=lambda p: sort_order.get(p.asset_type, 99))
+
             async with httpx.AsyncClient() as client:
-                for portfolio in user.portfolios:
+                for portfolio in portfolios_sorted:
                     buy_price = portfolio.buy_price
                     asset_type = portfolio.asset_type
                     asset_name = portfolio.asset_name
-                    response = await client.get(f"{API_BASE_URL}/{asset_type}/{asset_name}")
+                    app_id = portfolio.app_id
+
+                    url = f"{API_BASE_URL}/{asset_type}/{asset_name}" if app_id is None else f"{API_BASE_URL}/{asset_type}/{app_id}/{asset_name}"
+                    response = await client.get(url)
                     response.raise_for_status()
                     data = response.json()
                     current_price = Decimal(str(data.get('price', 0)))
@@ -41,11 +58,18 @@ async def portfolio_handler(message: Message) -> None:
                     total_current_value += current_price * portfolio.quantity
                     growth = ((current_price - buy_price ) / buy_price) * 100
 
-                    emoji = "📈" if growth and growth > 0 else "📉"
-                    asset_text = (f"<b> {emoji} {asset_type}:{asset_name}</b>\n"
-                                  f"Buy: {portfolio.quantity:.2f} at avg ${buy_price} on {portfolio.purchase_date.strftime('%Y-%m-%d')}\n"
-                                  f"Current: ${current_price}, growth: {growth:.2f}%\n\n")
-                    portfolio_text += asset_text
+                    emoji = "📈" if growth > 0 else "📉" if growth < 0 else ''
+                    growth_sign = '+' if growth > 0 else ''
+                    asset_text = f"<b>{asset_name}</b>: {portfolio.quantity:.2f} at avg. price ${buy_price}, now ${current_price}, value ${buy_price * portfolio.quantity:.2f} ({growth_sign}{growth:.2f}% {emoji})\n"
+
+                    if asset_type == 'stock':
+                        stock_text += asset_text
+                    elif asset_type == 'crypto':
+                        crypto_text += asset_text
+                    else:
+                        steam_text += asset_text
+
+            portfolio_text += stock_text + '\n' + crypto_text + '\n' + steam_text + '\n'
 
             total_percent_change = ((total_current_value - total_old_value) / total_old_value) * 100
             portfolio_text += (f"<b>💰 Total portfolio value: ${total_current_value:.2f}</b>\n"
