@@ -3,6 +3,8 @@ import httpx
 from aiogram import html
 from aiogram.filters import Command
 from aiogram.types import Message
+from sqlalchemy import select
+
 from src.common import dp, API_BASE_URL
 from src.dao.models import AsyncSessionLocal, User, Portfolio
 from src.utils import (get_logger)
@@ -11,7 +13,7 @@ logger = get_logger()
 
 @dp.message(Command('add_stock'))
 async def add_stock_handler(message: Message) -> None:
-    pattern = re.compile(r"^/add_stock\s+([A-Za-z]+)\s+(\d+\.?\d*)$")
+    pattern = re.compile(r"^/add_stock\s+(.+)\s+(\d+\.?\d*)$")
     match = pattern.match(message.text.strip())
     if not match:
         await message.answer("Please provide a valid ticker and amount!")
@@ -27,7 +29,7 @@ async def add_stock_handler(message: Message) -> None:
         else:
             async with httpx.AsyncClient() as client:
                 try:
-                    url = f"{API_BASE_URL}/stocks/{ticker}"
+                    url = f"{API_BASE_URL}/stock/{ticker}"
                     response = await client.get(url)
                     response.raise_for_status()
                     data = response.json()
@@ -40,9 +42,22 @@ async def add_stock_handler(message: Message) -> None:
                         quantity=amount,
                         buy_price=price
                     )
-                    session.add(portfolio)
-                    await session.commit()
 
+                    result = await session.execute(select(Portfolio).where(
+                        Portfolio.user_id == user.telegram_id, # NoQa
+                        Portfolio.asset_type == 'stock', # NoQa
+                        Portfolio.asset_name == ticker, # NoQa
+                        Portfolio.buy_price == price # NoQa
+                        )
+                    )
+                    asset = result.scalars().first()
+
+                    if asset:
+                        asset.quantity += amount
+                    else:
+                        session.add(portfolio)
+
+                    await session.commit()
                     await message.answer(f"Added {amount} {ticker} at {html.bold(price)}$")
                 except (httpx.HTTPError, KeyError, ValueError) as e:
                     logger.error(f"Error adding stock {ticker}: {e}")
@@ -50,7 +65,7 @@ async def add_stock_handler(message: Message) -> None:
 
 @dp.message(Command('add_crypto'))
 async def add_crypto_handler(message: Message) -> None:
-    pattern = re.compile(r"^/add_crypto\s+([A-Za-z]+)\s+(\d+\.?\d*)$")
+    pattern = re.compile(r"^/add_crypto\s+(.+)\s+(\d+\.?\d*)$")
     match = pattern.match(message.text.strip())
     if not match:
         await message.answer("Please provide a valid coin and amount!")
@@ -79,9 +94,22 @@ async def add_crypto_handler(message: Message) -> None:
                         quantity=amount,
                         buy_price=price
                     )
-                    session.add(portfolio)
-                    await session.commit()
 
+                    result = await session.execute(select(Portfolio).where(
+                        Portfolio.user_id == user.telegram_id, # NoQa
+                        Portfolio.asset_type == 'crypto', # NoQa
+                        Portfolio.asset_name == coin, # NoQa
+                        Portfolio.buy_price == price # NoQa
+                        )
+                    )
+                    asset = result.scalars().first()
+
+                    if asset:
+                        asset.quantity += amount
+                    else:
+                        session.add(portfolio)
+
+                    await session.commit()
                     await message.answer(f"Added {amount} {coin} at {html.bold(price)}$")
                 except (httpx.HTTPError, KeyError, ValueError) as e:
                     logger.error(f"Error adding crypto {coin}: {e}")
@@ -120,7 +148,22 @@ async def add_steam_handler(message: Message) -> None:
                         buy_price=price,
                         app_id=app_id
                     )
-                    session.add(portfolio)
+
+                    result = await session.execute(select(Portfolio).where(
+                        Portfolio.user_id == user.telegram_id, # NoQa
+                        Portfolio.asset_type == 'steam', # NoQa
+                        Portfolio.asset_name == market_name, # NoQa
+                        Portfolio.buy_price == price, # NoQa
+                        Portfolio.app_id == app_id # NoQa
+                        )
+                    )
+                    asset = result.scalars().first()
+
+                    if asset:
+                        asset.quantity += amount
+                    else:
+                        session.add(portfolio)
+
                     await session.commit()
 
                     await message.answer(f"Added {amount} {market_name} at {html.bold(price)}$")

@@ -11,7 +11,7 @@ logger = get_logger()
 
 @dp.message(Command('stock'))
 async def stock_handler(message: Message) -> None:
-    pattern = re.compile(r"^/stock\s+(A-Za-z0-9.+)$")
+    pattern = re.compile(r"^/stock\s+(.+)$")
     match = pattern.match(message.text.strip())
     if not match:
         await message.answer("Please provide a stock ticker, e.g., /stock AMD")
@@ -26,7 +26,7 @@ async def stock_handler(message: Message) -> None:
         else:
             async with httpx.AsyncClient() as client:
                 try:
-                    url = f"{API_BASE_URL}/stocks/{ticker}"
+                    url = f"{API_BASE_URL}/stock/{ticker}"
                     response = await client.get(url)
                     response.raise_for_status()
                     data = response.json()
@@ -37,7 +37,7 @@ async def stock_handler(message: Message) -> None:
 
 @dp.message(Command('crypto'))
 async def crypto_handler(message: Message) -> None:
-    pattern = re.compile(r"^/crypto\s+(A-Za-z0-9.+)$")
+    pattern = re.compile(r"^/crypto\s+(.+)$")
     match = pattern.match(message.text.strip())
     if not match:
         await message.answer("Please provide a coin name, e.g., /crypto BTC, /crypto Solana")

@@ -11,7 +11,7 @@ logger = get_logger()
 
 @dp.message(Command('remove_stock'))
 async def remove_stock_handler(message: Message) -> None:
-    pattern = re.compile(r"^/remove_stock\s+([A-Za-z0-9.]+)\s+(\d+\.?\d*)$")
+    pattern = re.compile(r"^/remove_stock\s+(.+)\s+(\d+\.?\d*)$")
     match = pattern.match(message.text.strip())
     if not match:
         await message.answer("Please provide a valid ticker and amount!")
@@ -27,13 +27,14 @@ async def remove_stock_handler(message: Message) -> None:
                 await message.answer(f"Sorry, to use this command, you need to first register(/register).")
                 return
 
-            asset = await session.execute(
-                select(Portfolio).where(
-                    Portfolio.user_id == user.telegram_id,
-                    Portfolio.asset_type == 'stock',
-                    Portfolio.asset_name == ticker
-                )
+            result = await session.execute(select(Portfolio).where(
+                    Portfolio.user_id == user.telegram_id, # NoQa
+                    Portfolio.asset_type == 'stock', # NoQa
+                    Portfolio.asset_name == ticker # NoQa
+                    )
             )
+            asset = result.scalars().first()
+
 
             asset = asset.scalar_one_or_none()
             if not asset:

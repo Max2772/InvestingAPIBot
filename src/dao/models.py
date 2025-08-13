@@ -25,12 +25,13 @@ class User(Base):
 
 class Portfolio(Base):
     __tablename__ = 'invsetingapibot_portfolios'
-    id = Column(BigInteger, unique=True, primary_key=True, autoincrement=True)
+    id = Column(Integer, unique=True, primary_key=True, autoincrement=True)
     user_id = Column(BigInteger, ForeignKey('invsetingapibot_users.telegram_id'), nullable=False)
     asset_type = Column(String)
     asset_name = Column(String)
     quantity = Column(Float)
     buy_price = Column(Float)
+    purchase_date = Column(DateTime, default=datetime.now(tz=UTC))
     app_id = Column(Integer, nullable=True)
 
     user = relationship("User", back_populates="portfolios")
