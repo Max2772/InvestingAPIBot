@@ -50,14 +50,3 @@ async_engine = create_async_engine(
 )
 
 AsyncSessionLocal = sessionmaker(async_engine, class_=AsyncSession, expire_on_commit=False) # NoQa
-
-"""
-AsyncSessionLocal = None
-if INVESTINGAPIBOT_ASYNC_DATABASE_URL := os.getenv("INVESTINGAPIBOT_ASYNC_DATABASE_URL"):
-    async_eninge = create_async_engine(
-        os.getenv("INVESTINGAPIBOT_ASYNC_DATABASE_URL", "sqlite+aiosqlite:///InvestingAPIBot.db"),
-        echo=True
-    )
-
-    AsyncSessionLocal = sessionmaker(bind=async_eninge, class_=AsyncSession, expire_on_commit=False) # NoQa
-"""
