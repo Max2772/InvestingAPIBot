@@ -4,9 +4,10 @@ import httpx
 from aiogram.enums import ParseMode
 from aiogram.filters import Command
 from aiogram.types import Message
+from sqlalchemy import func, select
 from sqlalchemy.exc import SQLAlchemyError
 from src.common import dp
-from src.dao.models import AsyncSessionLocal, User
+from src.dao.models import AsyncSessionLocal, User, Portfolio
 from src import (get_logger, profit_emoji, profit_sign)
 from src.common import API_BASE_URL
 
@@ -53,6 +54,13 @@ async def portfolio_handler(message: Message) -> None:
             total_old_value = Decimal('0')
             total_current_value = Decimal('0')
 
+            result = await session.execute(
+                select(func.count()).where(Portfolio.user_id == user.telegram_id) # NoQa
+            )
+            total_steps = result.scalar() or 0
+            step = 1
+            msg = await message.answer("Loading 0%")
+
             async with httpx.AsyncClient() as client:
                 for portfolio in user.portfolios:
                     if portfolio.asset_type == mode or mode == 'all':
@@ -91,6 +99,11 @@ async def portfolio_handler(message: Message) -> None:
                         else:
                             steam_text += asset_text
 
+                    percent = int(step / total_steps * 100)
+                    bar = "█" * (percent // 10) + "░" * (10 - percent // 10)
+                    await msg.edit_text(f"Loading {percent}%\n[{bar}]")
+                    step += 1
+            await msg.delete()
 
             if mode == 'stock':
                 portfolio_text += stock_text + '\n'
