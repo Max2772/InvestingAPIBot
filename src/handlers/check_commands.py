@@ -9,9 +9,9 @@ from src import (get_logger)
 
 logger = get_logger()
 
-@dp.message(Command('stock'))
-async def stock_handler(message: Message) -> None:
-    pattern = re.compile(r"^/stock\s+(.+)$")
+@dp.message(Command('check_stock'))
+async def check_stock_handler(message: Message) -> None:
+    pattern = re.compile(r"^/check_stock\s+(.+)$")
     match = pattern.match(message.text.strip())
     if not match:
         await message.answer("Please provide a stock ticker, e.g., /stock AMD")
@@ -35,9 +35,9 @@ async def stock_handler(message: Message) -> None:
                 logger.error(f"Failed to get stock ticker {ticker}: {e}")
                 await message.answer(f"Failed to fetch stock {ticker}")
 
-@dp.message(Command('crypto'))
-async def crypto_handler(message: Message) -> None:
-    pattern = re.compile(r"^/crypto\s+(.+)$")
+@dp.message(Command('check_crypto'))
+async def check_crypto_handler(message: Message) -> None:
+    pattern = re.compile(r"^/check_crypto\s+(.+)$")
     match = pattern.match(message.text.strip())
     if not match:
         await message.answer("Please provide a coin name, e.g., /crypto BTC, /crypto Solana")
@@ -61,9 +61,9 @@ async def crypto_handler(message: Message) -> None:
                 logger.error(f"Failed to get crypto {coin}: {e}")
                 await message.answer(f"Failed to fetch crypto {coin}")
 
-@dp.message(Command('steam'))
-async def steam_handler(message: Message) -> None:
-    pattern = re.compile(r"^/steam\s+(\d+)\s+(.+)$")
+@dp.message(Command('check_steam'))
+async def check_steam_handler(message: Message) -> None:
+    pattern = re.compile(r"^/check_steam\s+(\d+)\s+(.+)$")
     match = pattern.match(message.text.strip())
     if not match:
         await message.answer("Please provide a valid app_id and steam market name!")
