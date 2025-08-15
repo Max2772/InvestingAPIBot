@@ -9,7 +9,6 @@ __pycache__/
 # Distribution / packaging
 .log
 *.log
-requirements.in
 .Python
 build/
 develop-eggs/
