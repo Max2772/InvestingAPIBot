@@ -5,3 +5,5 @@ redis
 dotenv
 sqlalchemy
 alembic
+psycopg-binary
+aiopg
