@@ -1,0 +1,7 @@
+pip-tools
+aiogram
+httpx
+redis
+dotenv
+sqlalchemy
+alembic
