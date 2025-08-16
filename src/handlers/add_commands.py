@@ -60,7 +60,7 @@ async def add_stock_handler(message: Message) -> None:
                 asset = result.scalars().first()
 
                 if asset:
-                    asset.buy_price = (asset.quantity * asset.buy_price + amount * price) / 2
+                    asset.buy_price = (asset.quantity * asset.buy_price + amount * price) / (asset.quantity + amount)
                     asset.quantity += amount
                 else:
                     session.add(portfolio)
@@ -121,7 +121,7 @@ async def add_crypto_handler(message: Message) -> None:
                 asset = result.scalars().first()
 
                 if asset:
-                    asset.buy_price = (asset.quantity * asset.buy_price + amount * price) / 2
+                    asset.buy_price = (asset.quantity * asset.buy_price + amount * price) / (asset.quantity + amount)
                     asset.quantity += amount
                 else:
                     session.add(portfolio)
@@ -184,7 +184,7 @@ async def add_steam_handler(message: Message) -> None:
                 asset = result.scalars().first()
 
                 if asset:
-                    asset.buy_price = (asset.quantity * asset.buy_price + amount * price) / 2
+                    asset.buy_price = (asset.quantity * asset.buy_price + amount * price) / (asset.quantity + amount)
                     asset.quantity += amount
                 else:
                     session.add(portfolio)
