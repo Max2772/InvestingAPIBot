@@ -98,11 +98,12 @@ async def add_crypto_handler(message: Message) -> None:
                 response.raise_for_status()
                 data = response.json()
                 price = Decimal(str(data.get('price', 0.0)))
+                name = data.get(str(data.get('name', coin)))
 
                 portfolio = Portfolio(
                     user_id=user.telegram_id,
                     asset_type='crypto',
-                    asset_name=coin,
+                    asset_name=name,
                     quantity=amount,
                     buy_price=price
                 )
