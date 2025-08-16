@@ -113,7 +113,7 @@ async def add_crypto_handler(message: Message) -> None:
                         and_(
                             Portfolio.user_id == user.telegram_id,
                             Portfolio.asset_type == 'crypto',
-                            Portfolio.asset_name == coin
+                            Portfolio.asset_name == name
                         )
                     )
                 )
