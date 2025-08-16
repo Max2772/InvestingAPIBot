@@ -41,7 +41,7 @@ class Portfolio(Base):
 
 AsyncSessionLocal = None
 if INVESTINGAPIBOT_ASYNC_DATABASE_URL := os.getenv("INVESTINGAPIBOT_ASYNC_DATABASE_URL"):
-    async_eninge = create_async_engine(
+    async_engine = create_async_engine(
         os.getenv("INVESTINGAPIBOT_ASYNC_DATABASE_URL", "sqlite+aiosqlite:///InvestingAPIBot.db"),
         echo=True
     )
