@@ -31,7 +31,7 @@ class Portfolio(Base):
     asset_name = Column(String)
     quantity = Column(Numeric(precision=38, scale=18))
     buy_price = Column(Numeric(precision=38, scale=2))
-    purchase_date = Column(DateTime, default=datetime.now(tz=UTC))
+    purchase_date = Column(DateTime(timezone=True), default=datetime.now(tz=UTC))
     app_id = Column(Integer, nullable=True)
 
     user = relationship("User", back_populates="portfolios", lazy="selectin")
@@ -39,11 +39,14 @@ class Portfolio(Base):
     def __repr__(self):
         return f"<Portfolio(id={self.id}, user_id={self.user_id}, name='{self.asset_name}')>"
 
-AsyncSessionLocal = None
-if INVESTINGAPIBOT_ASYNC_DATABASE_URL := os.getenv("INVESTINGAPIBOT_ASYNC_DATABASE_URL"):
-    async_engine = create_async_engine(
-        os.getenv("INVESTINGAPIBOT_ASYNC_DATABASE_URL", "sqlite+aiosqlite:///InvestingAPIBot.db"),
-        echo=True
-    )
 
-    AsyncSessionLocal = sessionmaker(bind=async_eninge, class_=AsyncSession, expire_on_commit=False) # NoQa
+DATABASE_URL = os.getenv(
+    "INVESTINGAPIBOT_ASYNC_DATABASE_URL",
+    "sqlite+aiosqlite:///InvestingAPIBot.db"
+)
+
+async_engine = create_async_engine(
+    DATABASE_URL,
+    echo=True
+)
+AsyncSessionLocal = sessionmaker(bind=async_engine, class_=AsyncSession, expire_on_commit=False) # NoQa
