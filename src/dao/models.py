@@ -16,7 +16,7 @@ class User(Base):
     phone = Column(String(20), nullable=True)
     is_admin = Column(Boolean, default=False)
     is_active = Column(Boolean, default=True)
-    registered_at = Column(DateTime(timezone=True), default=datetime.now(tz=UTC))
+    registered_at = Column(DateTime(timezone=True), default=lambda: datetime.now(tz=UTC))
 
     portfolios = relationship("Portfolio", back_populates="user", lazy="selectin")
 
@@ -31,7 +31,7 @@ class Portfolio(Base):
     asset_name = Column(String)
     quantity = Column(Numeric(precision=38, scale=18))
     buy_price = Column(Numeric(precision=38, scale=2))
-    purchase_date = Column(DateTime, default=datetime.now(tz=UTC))
+    purchase_date = Column(DateTime, default=lambda: datetime.now(tz=UTC))
     app_id = Column(Integer, nullable=True)
 
     user = relationship("User", back_populates="portfolios", lazy="selectin")
