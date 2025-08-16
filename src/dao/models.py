@@ -41,12 +41,22 @@ class Portfolio(Base):
 
 
 DATABASE_URL = os.getenv(
+    "INVESTINGAPIBOT_DATABASE_URL",
+    "sqlite:///InvestingAPIBot.db"
+)
+
+engine = create_engine(
+    DATABASE_URL,
+    echo=True
+)
+
+ASYNC_DATABASE_URL = os.getenv(
     "INVESTINGAPIBOT_ASYNC_DATABASE_URL",
     "sqlite+aiosqlite:///InvestingAPIBot.db"
 )
 
 async_engine = create_async_engine(
-    DATABASE_URL,
+    ASYNC_DATABASE_URL,
     echo=True
 )
 AsyncSessionLocal = sessionmaker(bind=async_engine, class_=AsyncSession, expire_on_commit=False) # NoQa
