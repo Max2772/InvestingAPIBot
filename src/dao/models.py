@@ -7,7 +7,7 @@ from sqlalchemy.orm import declarative_base, sessionmaker, relationship
 Base = declarative_base()
 
 class User(Base):
-    __tablename__ = 'invsetingapibot_users'
+    __tablename__ = 'investingapibot_users'
 
     telegram_id = Column(BigInteger, unique=True, primary_key=True)
     username = Column(String(50), nullable=True)
@@ -24,9 +24,9 @@ class User(Base):
         return f"<User(id={self.telegram_id}, username='{self.username}')>"
 
 class Portfolio(Base):
-    __tablename__ = 'invsetingapibot_portfolios'
+    __tablename__ = 'investingapibot_portfolios'
     id = Column(Integer, unique=True, primary_key=True, autoincrement=True)
-    user_id = Column(BigInteger, ForeignKey('invsetingapibot_users.telegram_id'), nullable=False)
+    user_id = Column(BigInteger, ForeignKey('investingapibot_users.telegram_id'), nullable=False)
     asset_type = Column(String)
     asset_name = Column(String)
     quantity = Column(Numeric(precision=38, scale=18))
