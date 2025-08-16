@@ -40,9 +40,13 @@ class Portfolio(Base):
         return f"<Portfolio(id={self.id}, user_id={self.user_id}, name='{self.asset_name}')>"
 
 
+# DATABASE_URL = os.getenv(
+#     "INVESTINGAPIBOT_DATABASE_URL",
+#     "sqlite:///InvestingAPIBot.db"
+# )
+
 DATABASE_URL = os.getenv(
-    "INVESTINGAPIBOT_DATABASE_URL",
-    "sqlite:///InvestingAPIBot.db"
+    "INVESTINGAPIBOT_DATABASE_URL"
 )
 
 engine = create_engine(
@@ -50,10 +54,16 @@ engine = create_engine(
     echo=True
 )
 
+# ASYNC_DATABASE_URL = os.getenv(
+#     "INVESTINGAPIBOT_ASYNC_DATABASE_URL",
+#     "sqlite+aiosqlite:///InvestingAPIBot.db"
+# )
+
 ASYNC_DATABASE_URL = os.getenv(
     "INVESTINGAPIBOT_ASYNC_DATABASE_URL",
     "sqlite+aiosqlite:///InvestingAPIBot.db"
 )
+
 
 async_engine = create_async_engine(
     ASYNC_DATABASE_URL,
