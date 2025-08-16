@@ -1,6 +1,7 @@
 import os
 from datetime import datetime, UTC
-from sqlalchemy import Column, String, Boolean, DateTime, create_engine, BigInteger, Integer, ForeignKey, Float, Numeric
+from sqlalchemy import (Column, String, Boolean, DateTime, create_engine, BigInteger,
+                        Integer, ForeignKey, Float, Numeric, func)
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import declarative_base, sessionmaker, relationship
 
@@ -16,7 +17,7 @@ class User(Base):
     phone = Column(String(20), nullable=True)
     is_admin = Column(Boolean, default=False)
     is_active = Column(Boolean, default=True)
-    registered_at = Column(DateTime(timezone=True), default=datetime.now(tz=UTC))
+    registered_at = Column(DateTime(timezone=True), server_default=func.now())
 
     portfolios = relationship("Portfolio", back_populates="user", lazy="selectin")
 
@@ -31,7 +32,7 @@ class Portfolio(Base):
     asset_name = Column(String)
     quantity = Column(Numeric(precision=38, scale=18))
     buy_price = Column(Numeric(precision=38, scale=2))
-    purchase_date = Column(DateTime(timezone=True), default=datetime.now(tz=UTC))
+    purchase_date = Column(DateTime(timezone=True), server_default=func.now())
     app_id = Column(Integer, nullable=True)
 
     user = relationship("User", back_populates="portfolios", lazy="selectin")
