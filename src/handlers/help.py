@@ -7,6 +7,8 @@ from src.common import dp
 async def help_handler(message: Message) -> None:
     help_text = (
         "<b>📚 Bot Commands</b>\n\n"
+        "<b>ℹ️ Help</b>\n"
+        "  /help - Show this help message with all commands\n\n"
         "<b>🔑 Registration</b>\n"
         "  /start, /register - Register to start tracking your portfolio\n\n"
         "<b>💹 Check Prices</b>\n"
