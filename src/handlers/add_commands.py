@@ -139,7 +139,7 @@ async def add_steam_handler(message: Message) -> None:
         await message.answer("Please provide a valid app_id, market name and amount!")
         return
 
-    app_id = match.group(1)
+    app_id = int(match.group(1))
     market_name = match.group(2)
     amount = Decimal(str(match.group(3)))
 
