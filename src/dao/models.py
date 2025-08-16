@@ -60,8 +60,7 @@ engine = create_engine(
 # )
 
 ASYNC_DATABASE_URL = os.getenv(
-    "INVESTINGAPIBOT_ASYNC_DATABASE_URL",
-    "sqlite+aiosqlite:///InvestingAPIBot.db"
+    "INVESTINGAPIBOT_ASYNC_DATABASE_URL"
 )
 
 
