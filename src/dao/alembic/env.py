@@ -6,7 +6,7 @@ from sqlalchemy import pool
 
 from alembic import context
 
-from src.dao.models import Base, engine
+from src.dao.models import Base, async_engine
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -60,7 +60,7 @@ def run_migrations_online() -> None:
     and associate a connection with the context.
 
     """
-    connectable = engine
+    connectable = async_engine
 
     with connectable.connect() as connection:
         context.configure(
