@@ -46,7 +46,7 @@ async def portfolio_handler(message: Message) -> None:
                 return
 
             portfolio_text = f"<b>📊 {mode_titles[mode]}</b>\n\n"
-            stock_text = "<b>🗠  Stocks</b>\n"
+            stock_text = "<b>🏛️  Stocks</b>\n"
             crypto_text = "<b>₿  Crypto</b>\n"
             steam_text = "<b>🎮  Steam Items</b>\n"
 
@@ -90,7 +90,7 @@ async def portfolio_handler(message: Message) -> None:
 
                         asset_text = (f"<b>{asset_name}</b>: {portfolio.quantity:.2f} at avg. price ${buy_price:.2f},"
                                       f" now ${current_price:.2f}, value ${buy_price * portfolio.quantity:.2f}"
-                                      f" ({profit_sign(growth)}{growth:.2f}% {profit_emoji(growth)})\n")
+                                      f" ({profit_sign(growth)}{growth:.2f}%{profit_emoji(growth)})\n")
 
                         if asset_type == 'stock':
                             stock_text += asset_text
@@ -117,7 +117,7 @@ async def portfolio_handler(message: Message) -> None:
             total_percent_change = ((total_current_value - total_old_value) / total_old_value) * 100
             portfolio_text += ("◇───────────────────────────────────────────◇\n\n"
                                f"<b>💰 Total value: ${total_current_value:.2f}</b>\n"
-                               f"<b>📊 Total growth: {total_percent_change:+.2f}% {profit_emoji(total_percent_change)}</b>")
+                               f"<b>📊 Total growth: {total_percent_change:+.2f}%{profit_emoji(total_percent_change)}</b>")
             await message.answer(portfolio_text, parse_mode=ParseMode.HTML)
 
         except SQLAlchemyError as e:
