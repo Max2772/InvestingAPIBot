@@ -41,11 +41,11 @@ async def set_alert_handler(message: Message) -> None:
             async with httpx.AsyncClient() as client:
                 url = f"{API_BASE_URL}/{asset_type}/{asset_name}" if app_id is None else f"{API_BASE_URL}/{asset_type}/{app_id}/{asset_name}"
                 response = await client.get(url)
-                response.raise_for_status()
                 if response.status_code == 404:
                     await message.answer("Sorry, this asset doesn't exist.")
                     return
 
+                response.raise_for_status()
                 data = response.json()
                 name = str(data.get('name', asset_name))
 
@@ -78,5 +78,5 @@ async def set_alert_handler(message: Message) -> None:
                 await message.answer(f"Added alert for {alert.asset_name} with target price ${html.bold(price)}")
 
         except (httpx.HTTPError, KeyError, ValueError) as e:
-          logger.error(f"Error adding alert for {alert.asset_name}: {e}")
-          await message.answer(f"Failed to add alert for {alert.asset_name}")
+          logger.error(f"Error adding alert: {str(e)}")
+          await message.answer(f"Failed to add alert")
