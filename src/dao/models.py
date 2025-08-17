@@ -19,6 +19,7 @@ class User(Base):
     registered_at = Column(DateTime(timezone=True), default=lambda: datetime.now(tz=UTC))
 
     portfolios = relationship("Portfolio", back_populates="user", lazy="selectin")
+    alerts = relationship("Alert", back_populates="user", lazy="selectin")
 
     def __repr__(self):
         return f"<User(id={self.telegram_id}, username='{self.username}')>"
@@ -27,17 +28,32 @@ class Portfolio(Base):
     __tablename__ = 'investingapibot_portfolios'
     id = Column(Integer, unique=True, primary_key=True, autoincrement=True)
     user_id = Column(BigInteger, ForeignKey('investingapibot_users.telegram_id'), nullable=False)
-    asset_type = Column(String)
-    asset_name = Column(String)
+    asset_type = Column(String, nullable=False)
+    asset_name = Column(String, nullable=False)
     quantity = Column(Numeric(precision=38, scale=18))
     buy_price = Column(Numeric(precision=38, scale=2))
-    purchase_date = Column(DateTime, default=lambda: datetime.now(tz=UTC))
+    purchase_date = Column(DateTime(timezone=True), default=lambda: datetime.now(tz=UTC))
     app_id = Column(Integer, nullable=True)
 
     user = relationship("User", back_populates="portfolios", lazy="selectin")
 
     def __repr__(self):
         return f"<Portfolio(id={self.id}, user_id={self.user_id}, name='{self.asset_name}')>"
+
+class Alert(Base):
+    __tablename__ = 'investingapibot_alerts'
+    id = Column(Integer, unique=True, primary_key=True, autoincrement=True)
+    user_id = Column(BigInteger, ForeignKey('investingapibot_users.telegram_id'), nullable=False)
+    asset_type = Column(String, nullable=False)
+    asset_name = Column(String, nullable=False)
+    target_price = Column(Numeric(precision=38, scale=18))
+    registered_at = Column(DateTime(timezone=True), default=lambda: datetime.now(tz=UTC))
+    app_id = Column(Integer, nullable=True)
+
+    user = relationship("User", back_populates="alerts", lazy="selectin")
+
+    def __repr__(self):
+        return f"<Alert(id={self.id}, user_id={self.user_id}, name='{self.asset_name}', alert_price={self.alert_price})>"
 
 engine = create_engine(
     os.getenv("INVESTINGAPIBOT_DATABASE_URL", "sqlite:///InvestingAPIBot.db"),
