@@ -23,7 +23,7 @@ async def set_alert_handler(message: Message) -> None:
 
     asset_type = match.group(1).lower()
     app_id = int(match.group(2)) if match.group(2) else None
-    asset_name = match.group(3)
+    asset_name = match.group(3).upper() if asset_type == "stock" else match.group(3)
     price = Decimal(str(match.group(4)))
 
 
@@ -53,7 +53,8 @@ async def set_alert_handler(message: Message) -> None:
                     user_id=user.telegram_id,
                     asset_type=asset_type,
                     asset_name=name,
-                    target_price=price
+                    target_price=price,
+                    app_id=app_id,
                 )
 
                 result = await session.execute(
@@ -61,7 +62,8 @@ async def set_alert_handler(message: Message) -> None:
                         and_(
                             Alert.user_id == alert.user_id,
                             Alert.asset_type == alert.asset_type,
-                            Alert.asset_name == alert.asset_name
+                            Alert.asset_name == alert.asset_name,
+                            Alert.app_id == alert.app_id
                         )
                     )
                 )

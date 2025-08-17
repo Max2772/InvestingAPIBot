@@ -24,7 +24,7 @@ async def alerts_handler(message: Message) -> None:
                 return
 
             result = await session.execute(
-                select(func.count()).where(Alert.user_id == user.telegram_id) # NoQa
+                select(Alert).where(Alert.user_id == user.telegram_id) # NoQa
             )
 
             alerts = result.scalars()
