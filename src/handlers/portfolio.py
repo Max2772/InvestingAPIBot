@@ -23,7 +23,7 @@ mode_titles = {
 }
 
 @dp.message(Command('portfolio'))
-async def portfolio_handler(message: Message) -> None:
+async def portfolio_handler(message: Message, user: User) -> None:
     pattern = re.compile(r"^/portfolio\s+(all|stocks|crypto|steam)$")
     match = re.match(pattern, message.text.strip())
     mode = match.group(1) if match and match.group(1) in PORTFOLIO_SETTINGS else 'all'
@@ -34,13 +34,8 @@ async def portfolio_handler(message: Message) -> None:
     if mode == 'stocks':
         mode = 'stock'
 
-    async with (AsyncSessionLocal() as session):
+    async with AsyncSessionLocal() as session:
         try:
-            user = await session.get(User, message.from_user.id)
-            if not user:
-                await message.answer(f"Please register first (/register).")
-                return
-
             if not user.portfolios:
                 await message.answer("Your portfolio is empty. Add assets with /add_stock, /add_crypto, or /add_steam.")
                 return

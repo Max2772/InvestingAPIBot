@@ -10,8 +10,8 @@ class UserMiddleware(BaseMiddleware):
             async with AsyncSessionLocal() as session:
                 user = await session.get(User, event.from_user.id)
                 if not user:
-                    await event.answer("Please register first (/register).")
+                    await event.answer('Please register first (/register).')
                     return
 
-                data["user"] = user
+                data['user'] = user
                 return await handler(event, data)

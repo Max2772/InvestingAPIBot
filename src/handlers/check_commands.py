@@ -1,4 +1,5 @@
 import re
+from urllib.parse import unquote
 import httpx
 from aiogram import html
 from aiogram.filters import Command
@@ -19,21 +20,16 @@ async def check_stock_handler(message: Message) -> None:
 
     ticker = match.group(1).upper()
 
-    async with AsyncSessionLocal() as session:
-        user = await session.get(User, message.from_user.id)
-        if not user:
-            await message.answer(f"Sorry, to use this command, you need to first register(/register).")
-            return
-        async with httpx.AsyncClient() as client:
-            try:
-                url = f"{API_BASE_URL}/stock/{ticker}"
-                response = await client.get(url)
-                response.raise_for_status()
-                data = response.json()
-                await message.answer(f"Stock ticker {ticker}: {html.bold(data.get('price', 'X'))}$")
-            except (httpx.HTTPError, KeyError, ValueError) as e:
-                logger.error(f"Failed to get stock ticker {ticker}: {e}")
-                await message.answer(f"Failed to fetch stock {ticker}")
+    async with httpx.AsyncClient() as client:
+        try:
+            url = f"{API_BASE_URL}/stock/{ticker}"
+            response = await client.get(url)
+            response.raise_for_status()
+            data = response.json()
+            await message.answer(f"Stock ticker {ticker}: {html.bold(data.get('price', 'X'))}$")
+        except (httpx.HTTPError, KeyError, ValueError) as e:
+            logger.error(f"Failed to get stock ticker {ticker}: {e}")
+            await message.answer(f"Failed to fetch stock {ticker}")
 
 @dp.message(Command('check_crypto'))
 async def check_crypto_handler(message: Message) -> None:
@@ -45,21 +41,16 @@ async def check_crypto_handler(message: Message) -> None:
 
     coin = match.group(1)
 
-    async with AsyncSessionLocal() as session:
-        user = await session.get(User, message.from_user.id)
-        if not user:
-            await message.answer(f"Sorry, to use this command, you need to first register(/register).")
-            return
-        async with httpx.AsyncClient() as client:
-            try:
-                url = f"{API_BASE_URL}/crypto/{coin}"
-                response = await client.get(url)
-                response.raise_for_status()
-                data = response.json()
-                await message.answer(f"Coin {coin}: {html.bold(data.get('price', 'X'))}$")
-            except (httpx.HTTPError, KeyError, ValueError) as e:
-                logger.error(f"Failed to get crypto {coin}: {e}")
-                await message.answer(f"Failed to fetch crypto {coin}")
+    async with httpx.AsyncClient() as client:
+        try:
+            url = f"{API_BASE_URL}/crypto/{coin}"
+            response = await client.get(url)
+            response.raise_for_status()
+            data = response.json()
+            await message.answer(f"Coin {coin}: {html.bold(data.get('price', 'X'))}$")
+        except (httpx.HTTPError, KeyError, ValueError) as e:
+            logger.error(f"Failed to get crypto {coin}: {e}")
+            await message.answer(f"Failed to fetch crypto {coin}")
 
 @dp.message(Command('check_steam'))
 async def check_steam_handler(message: Message) -> None:
@@ -70,22 +61,16 @@ async def check_steam_handler(message: Message) -> None:
         return
 
     app_id = match.group(1)
-    market_name = match.group(2)
+    market_name = unquote(match.group(2))
 
-    async with AsyncSessionLocal() as session:
-        user = await session.get(User, message.from_user.id)
-        if not user:
-            await message.answer(f"Sorry, to use this command, you need to first register(/register).")
-            return
-        async with httpx.AsyncClient() as client:
-            try:
-                url = f"{API_BASE_URL}/steam/{app_id}/{market_name}"
-                response = await client.get(url)
-                response.raise_for_status()
-                data = response.json()
-                price = data.get('price', 0.0)
-                await message.answer(f"Steam game: {app_id}, Steam item {market_name}: {html.bold(price)}$")
-            except (httpx.HTTPError, KeyError, ValueError) as e:
-                logger.error(f"Failed to get Steam item {market_name}, app_id {app_id}: {e}")
-                await message.answer(f"Failed to fetch steam item {market_name} from {app_id}")
-
+    async with httpx.AsyncClient() as client:
+        try:
+            url = f"{API_BASE_URL}/steam/{app_id}/{market_name}"
+            response = await client.get(url)
+            response.raise_for_status()
+            data = response.json()
+            price = data.get('price', 0.0)
+            await message.answer(f"Steam game: {app_id}, Steam item: {market_name}: {html.bold(price)}$")
+        except (httpx.HTTPError, KeyError, ValueError) as e:
+            logger.error(f"Failed to get Steam item {market_name}, app_id {app_id}: {e}")
+            await message.answer(f"Failed to fetch steam item {market_name} from {app_id}")

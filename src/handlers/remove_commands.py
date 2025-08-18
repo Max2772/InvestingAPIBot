@@ -1,17 +1,20 @@
 import re
 from decimal import Decimal
+from urllib.parse import unquote
+
+import httpx
 from aiogram.filters import Command
 from aiogram.types import Message
 from sqlalchemy import select, and_
 from sqlalchemy.exc import SQLAlchemyError
-from src.common import dp
+from src.common import dp, API_BASE_URL
 from src.dao.models import AsyncSessionLocal, User, Portfolio
 from src import (get_logger)
 
 logger = get_logger()
 
 @dp.message(Command('remove_stock'))
-async def remove_stock_handler(message: Message) -> None:
+async def remove_stock_handler(message: Message, user: User):
     pattern = re.compile(r"^/remove_stock\s+(.+)\s+(\d+(\.\d+)?|\d+(\.\d+)?[eE][+-]\d+)$")
     match = pattern.match(message.text.strip())
     if not match:
@@ -27,11 +30,6 @@ async def remove_stock_handler(message: Message) -> None:
 
     async with AsyncSessionLocal() as session:
         try:
-            user = await session.get(User, message.from_user.id)
-            if not user:
-                await message.answer(f"Sorry, to use this command, you need to first register(/register).")
-                return
-
             result = await session.execute(
                 select(Portfolio).where(
                 and_(
@@ -48,7 +46,7 @@ async def remove_stock_handler(message: Message) -> None:
                 return
 
             if asset.quantity < amount:
-                await message.answer(f"Sorry, you don't have {amount} of {ticker} in your portfolio.\nCurrent amount {asset.quantity}")
+                await message.answer(f"Sorry, you don't have {amount} of {ticker} in your portfolio.\nCurrent amount {asset.quantity:.2f}")
                 return
             elif asset.quantity == amount:
                 await session.delete(asset)
@@ -66,7 +64,7 @@ async def remove_stock_handler(message: Message) -> None:
             await message.answer(f"Failed to remove stock {ticker}.")
 
 @dp.message(Command('remove_crypto'))
-async def remove_crypto_handler(message: Message) -> None:
+async def remove_crypto_handler(message: Message, user: User):
     pattern = re.compile(r"^/remove_crypto\s+(.+)\s+(\d+(\.\d+)?|\d+(\.\d+)?[eE][+-]\d+)$")
     match = pattern.match(message.text.strip())
     if not match:
@@ -81,47 +79,53 @@ async def remove_crypto_handler(message: Message) -> None:
         return
 
     async with AsyncSessionLocal() as session:
-        try:
-            user = await session.get(User, message.from_user.id)
-            if not user:
-                await message.answer(f"Sorry, to use this command, you need to first register(/register).")
-                return
+        async with httpx.AsyncClient() as client:
+            try:
+                url = f"{API_BASE_URL}/crypto/{coin}"
+                response = await client.get(url)
+                if response.status_code == 404:
+                    await message.answer("Sorry, this asset doesn't exist.")
+                    return
 
-            result = await session.execute(
-                select(Portfolio).where(
-                and_(
-                    Portfolio.user_id == user.telegram_id,
-                    Portfolio.asset_type == 'crypto',
-                    Portfolio.asset_name == coin
+                response.raise_for_status()
+                data = response.json()
+                name = data.get('name', coin)
+
+                result = await session.execute(
+                    select(Portfolio).where(
+                    and_(
+                        Portfolio.user_id == user.telegram_id,
+                        Portfolio.asset_type == 'crypto',
+                        Portfolio.asset_name == name
+                        )
                     )
                 )
-            )
-            asset = result.scalar_one_or_none()
+                asset = result.scalar_one_or_none()
 
-            if not asset:
-                await message.answer(f"Sorry, you don't have {coin} in your portfolio.")
-                return
+                if not asset:
+                    await message.answer(f"Sorry, you don't have {coin} in your portfolio.")
+                    return
 
-            if asset.quantity < amount:
-                await message.answer(f"Sorry, you don't have {amount} of {coin} in your portfolio.\nCurrent amount {asset.quantity}")
-                return
-            elif asset.quantity == amount:
-                await session.delete(asset)
-            else:
-                asset.quantity -= amount
+                if asset.quantity < amount:
+                    await message.answer(f"Sorry, you don't have {amount} of {coin} in your portfolio.\nCurrent amount {asset.quantity}")
+                    return
+                elif asset.quantity == amount:
+                    await session.delete(asset)
+                else:
+                    asset.quantity -= amount
 
-            await session.commit()
+                await session.commit()
 
-            await message.answer(f"Removed {amount} {coin} from portfolio")
-        except SQLAlchemyError as e:
-            logger.error(f"Database error while removing crypto {coin}: {e}")
-            await message.answer(f"Failed to remove crypto {coin} due to database error.")
-        except Exception as e:
-            logger.error(f"Failed to remove crypto {coin}: {e}")
-            await message.answer(f"Failed to remove crypto {coin}.")
+                await message.answer(f"Removed {amount} {coin} from portfolio")
+            except SQLAlchemyError as e:
+                logger.error(f"Database error while removing crypto {coin}: {e}")
+                await message.answer(f"Failed to remove crypto {coin} due to database error.")
+            except Exception as e:
+                logger.error(f"Failed to remove crypto {coin}: {e}")
+                await message.answer(f"Failed to remove crypto {coin}.")
 
 @dp.message(Command('remove_steam'))
-async def remove_steam_handler(message: Message) -> None:
+async def remove_steam_handler(message: Message, user: User):
     pattern = re.compile(r"^/remove_steam\s+(\d+)\s+(.+)\s+(\d+)$")
     match = pattern.match(message.text.strip())
     if not match:
@@ -129,7 +133,7 @@ async def remove_steam_handler(message: Message) -> None:
         return
 
     app_id = match.group(1)
-    market_name = match.group(2)
+    market_name = unquote(match.group(2))
     amount = Decimal(str(match.group(3)))
 
     if amount == 0:
@@ -138,11 +142,6 @@ async def remove_steam_handler(message: Message) -> None:
 
     async with AsyncSessionLocal() as session:
         try:
-            user = await session.get(User, message.from_user.id)
-            if not user:
-                await message.answer(f"Sorry, to use this command, you need to first register(/register).")
-                return
-
             result = await session.execute(
                 select(Portfolio).where(
                 and_(

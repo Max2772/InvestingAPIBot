@@ -5,7 +5,7 @@ from src.common import dp
 from src.dao.models import AsyncSessionLocal, User
 
 @dp.message(Command('start', 'register'))
-async def register_handler(message: Message) -> None:
+async def register_handler(message: Message):
     async with AsyncSessionLocal() as session:
         user = await session.get(User, message.from_user.id)
         if not user:
