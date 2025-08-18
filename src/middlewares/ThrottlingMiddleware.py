@@ -1,7 +1,7 @@
-from typing import Any, Awaitable, Callable, Dict
 from aiogram import BaseMiddleware
 from aiogram.fsm.storage.redis import RedisStorage
-from aiogram.types import TelegramObject, Message
+
+from src.config import THROTTLE_FIRST_LIMIT, THROTTLE_SECOND_LIMIT
 
 
 class ThrottlingMiddleware(BaseMiddleware):
@@ -14,9 +14,9 @@ class ThrottlingMiddleware(BaseMiddleware):
 
         if check_user:
             if int(check_user.decode()) == 1:
-                await self.storage.redis.set(name=user, value=0, ex=5)
-                return await event.answer("Too many requests! Try later")
+                await self.storage.redis.set(name=user, value=0, ex=THROTTLE_SECOND_LIMIT)
+                return await event.answer('Too many requests! Try later')
             return
 
-        await self.storage.redis.set(name=user, value=1, ex=1)
+        await self.storage.redis.set(name=user, value=1, ex=THROTTLE_FIRST_LIMIT)
         return await handler(event, data)

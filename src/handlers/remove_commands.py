@@ -1,15 +1,16 @@
 import re
 from decimal import Decimal
 from urllib.parse import unquote
-
 import httpx
 from aiogram.filters import Command
 from aiogram.types import Message
 from sqlalchemy import select, and_
 from sqlalchemy.exc import SQLAlchemyError
-from src.common import dp, API_BASE_URL
+
 from src.dao.models import AsyncSessionLocal, User, Portfolio
-from src import (get_logger)
+from src.bot_init import dp
+from src import (get_api_url, get_logger)
+
 
 logger = get_logger()
 
@@ -24,8 +25,8 @@ async def remove_stock_handler(message: Message, user: User):
     ticker = match.group(1).upper()
     amount = Decimal(str(match.group(2)))
 
-    if amount == 0:
-        await message.answer("Amount cannot be zero!")
+    if amount <= 0:
+        await message.answer('Amount must be positive!')
         return
 
     async with AsyncSessionLocal() as session:
@@ -52,7 +53,6 @@ async def remove_stock_handler(message: Message, user: User):
                 await session.delete(asset)
             else:
                 asset.quantity -= amount
-
             await session.commit()
 
             await message.answer(f"Removed {amount} {ticker} from portfolio")
@@ -74,14 +74,14 @@ async def remove_crypto_handler(message: Message, user: User):
     coin = match.group(1).upper()
     amount = Decimal(str(match.group(2)))
 
-    if amount == 0:
-        await message.answer("Amount cannot be zero!")
+    if amount <= 0:
+        await message.answer('Amount must be positive!')
         return
 
     async with AsyncSessionLocal() as session:
         async with httpx.AsyncClient() as client:
             try:
-                url = f"{API_BASE_URL}/crypto/{coin}"
+                url = get_api_url('crypto', coin)
                 response = await client.get(url)
                 if response.status_code == 404:
                     await message.answer("Sorry, this asset doesn't exist.")
@@ -89,7 +89,7 @@ async def remove_crypto_handler(message: Message, user: User):
 
                 response.raise_for_status()
                 data = response.json()
-                name = data.get('name', coin)
+                name = str(data.get('name', coin))
 
                 result = await session.execute(
                     select(Portfolio).where(
@@ -115,7 +115,6 @@ async def remove_crypto_handler(message: Message, user: User):
                     asset.quantity -= amount
 
                 await session.commit()
-
                 await message.answer(f"Removed {amount} {coin} from portfolio")
             except SQLAlchemyError as e:
                 logger.error(f"Database error while removing crypto {coin}: {e}")
@@ -132,24 +131,25 @@ async def remove_steam_handler(message: Message, user: User):
         await message.answer("Please provide a valid app_id, market_name and amount!")
         return
 
-    app_id = match.group(1)
+    app_id = int(match.group(1))
     market_name = unquote(match.group(2))
     amount = Decimal(str(match.group(3)))
 
-    if amount == 0:
-        await message.answer("Amount cannot be zero!")
+    if amount <= 0:
+        await message.answer('Amount must be positive!')
         return
 
     async with AsyncSessionLocal() as session:
         try:
             result = await session.execute(
                 select(Portfolio).where(
-                and_(
-                    Portfolio.user_id == user.telegram_id,
-                    Portfolio.asset_type == 'steam',
-                    Portfolio.asset_name == market_name,
-                    Portfolio.app_id == app_id
-                    )
+                    and_
+                        (
+                        Portfolio.user_id == user.telegram_id,
+                        Portfolio.asset_type == 'steam',
+                        Portfolio.asset_name == market_name,
+                        Portfolio.app_id == app_id
+                        )
                 )
             )
             asset = result.scalar_one_or_none()
@@ -159,7 +159,7 @@ async def remove_steam_handler(message: Message, user: User):
                 return
 
             if asset.quantity < amount:
-                await message.answer(f"Sorry, you don't have {amount} of {market_name} in your portfolio.\nCurrent amount {asset.quantity}")
+                await message.answer(f"Sorry, you don't have {amount} of {market_name} in your portfolio.\nCurrent amount {asset.quantity:2f}")
                 return
             elif asset.quantity == amount:
                 await session.delete(asset)

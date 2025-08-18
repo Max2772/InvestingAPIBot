@@ -1,6 +1,8 @@
 from aiogram import BaseMiddleware
 from aiogram.types import Message
+
 from src.dao.models import AsyncSessionLocal, User
+
 
 class UserMiddleware(BaseMiddleware):
         async def __call__(self, handler, event: Message, data: dict):

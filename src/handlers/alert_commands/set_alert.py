@@ -1,17 +1,17 @@
 import re
 from decimal import Decimal
 import httpx
-from aiogram import html
 from aiogram.enums import ParseMode
 from aiogram.filters import Command
 from aiogram.types import Message
 from sqlalchemy import select, and_, func
 from sqlalchemy.exc import SQLAlchemyError
 
-from src.common import dp
 from src.dao.models import AsyncSessionLocal, User, Alert
-from src import (get_logger)
-from src.common import API_BASE_URL
+from src.bot_init import dp
+from src.config import MAXIMUM_ALERTS
+from src import (get_logger, get_api_url)
+
 
 logger = get_logger()
 
@@ -20,11 +20,7 @@ async def set_alert_handler(message: Message, user: User):
     pattern = re.compile(r"^/set_alert\s+(stock|crypto|steam)(\s+\d+)?\s+(.+)\s+(>|>=|<|<=)\s+(\d+(\.\d+)?)$", re.IGNORECASE)
     match = pattern.match(message.text.strip())
     if not match:
-        await message.answer(
-            "<b>🔔 Usage:</b> /set_alert <code>stock|crypto|steam [app_id]</code> "
-            "<code>asset</code> <code>>|>=|<|<=</code> <code>price</code>\n",
-            parse_mode=ParseMode.HTML
-        )
+        await message.answer("❌ Invalid format. Use /help to see how to write this command.")
         return
 
     asset_type = match.group(1).lower()
@@ -34,7 +30,7 @@ async def set_alert_handler(message: Message, user: User):
     price = Decimal(str(match.group(5)))
 
     if price <= 0:
-        await message.answer("Target price must be positive!",)
+        await message.answer("Target price must be positive!")
         return
 
     async with AsyncSessionLocal() as session:
@@ -42,14 +38,16 @@ async def set_alert_handler(message: Message, user: User):
             result = await session.execute(
                 select(func.count()).where(Alert.user_id == user.telegram_id) # NoQa
             )
+
             count = result.scalar_one_or_none()
-            if count > 20:
+            if count + 1 > MAXIMUM_ALERTS:
                 await message.answer(
-                    "You have reached the maximum number of alerts (20). Delete some alerts first.")
+                    f"You have reached the maximum number of alerts ({MAXIMUM_ALERTS}). Delete some alerts first."
+                )
                 return
 
             async with httpx.AsyncClient() as client:
-                url = f"{API_BASE_URL}/{asset_type}/{asset_name}" if app_id is None else f"{API_BASE_URL}/{asset_type}/{app_id}/{asset_name}"
+                url = get_api_url(asset_type, asset_name, app_id)
                 response = await client.get(url)
                 if response.status_code == 404:
                     await message.answer("Sorry, this asset doesn't exist.")

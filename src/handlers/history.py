@@ -2,9 +2,11 @@ import re
 from aiogram.filters import Command
 from aiogram.types import Message
 from sqlalchemy.exc import SQLAlchemyError
+
+from src.bot_init import dp
 from src import (get_logger)
-from src.common import dp
-from src.dao.models import AsyncSessionLocal, User, Portfolio
+from src.dao.models import User
+
 
 logger = get_logger()
 
@@ -41,7 +43,7 @@ async def history_handler(message: Message, user: User) -> None:
         history_text = "<b>📜 Portfolio History</b>\n\n"
         for portfolio in user.portfolios:
             if portfolio.asset_type == mode or mode == 'all':
-                asset_text = (f"Added {portfolio.quantity:.2f} {portfolio.asset_name}"
+                asset_text = (f"Added {portfolio.quantity if portfolio.asset_type == 'crypto' else portfolio.quantity:.2f} {portfolio.asset_name}"
                               f" at {portfolio.purchase_date.strftime('%y-%m-%d %H:%M:%S')}\n")
 
                 if portfolio.asset_type == 'stock':
@@ -63,8 +65,8 @@ async def history_handler(message: Message, user: User) -> None:
         await message.answer(history_text)
 
     except SQLAlchemyError as e:
-        logger.error(f"Database error while retrieving history of {portfolio.asset_name}: {e}")
-        await message.answer(f"Failed to retrieve history of {portfolio.asset_name} due to database error.")
+        logger.error(f"Database error while retrieving history: {e}")
+        await message.answer(f"Failed to retrieve history due to database error.")
     except Exception as e:
-        logger.error(f"Failed to retrieve history of {portfolio.asset_name}: {e}")
-        await message.answer(f"Failed to retrieve history of {portfolio.asset_name}.")
+        logger.error(f"Failed to retrieve history: {e}")
+        await message.answer(f"Failed to retrieve history.")

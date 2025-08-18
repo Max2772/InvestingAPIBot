@@ -4,14 +4,15 @@ import httpx
 from aiogram import html
 from aiogram.filters import Command
 from aiogram.types import Message
-from src.common import dp, API_BASE_URL
-from src.dao.models import AsyncSessionLocal, User
-from src import (get_logger)
+
+from src.bot_init import dp
+from src import (get_logger, get_api_url)
+
 
 logger = get_logger()
 
 @dp.message(Command('check_stock'))
-async def check_stock_handler(message: Message) -> None:
+async def check_stock_handler(message: Message):
     pattern = re.compile(r"^/check_stock\s+(.+)$")
     match = pattern.match(message.text.strip())
     if not match:
@@ -22,17 +23,17 @@ async def check_stock_handler(message: Message) -> None:
 
     async with httpx.AsyncClient() as client:
         try:
-            url = f"{API_BASE_URL}/stock/{ticker}"
+            url = get_api_url('stock', ticker)
             response = await client.get(url)
             response.raise_for_status()
             data = response.json()
-            await message.answer(f"Stock ticker {ticker}: {html.bold(data.get('price', 'X'))}$")
-        except (httpx.HTTPError, KeyError, ValueError) as e:
-            logger.error(f"Failed to get stock ticker {ticker}: {e}")
-            await message.answer(f"Failed to fetch stock {ticker}")
+            await message.answer(f"Stock ticker {ticker}: ${html.bold(data.get('price', 0.0))}")
+        except Exception as e:
+            logger.error(f"Failed to check stock {ticker}: {e}")
+            await message.answer(f"Failed to check stock {ticker}")
 
 @dp.message(Command('check_crypto'))
-async def check_crypto_handler(message: Message) -> None:
+async def check_crypto_handler(message: Message):
     pattern = re.compile(r"^/check_crypto\s+(.+)$")
     match = pattern.match(message.text.strip())
     if not match:
@@ -43,34 +44,33 @@ async def check_crypto_handler(message: Message) -> None:
 
     async with httpx.AsyncClient() as client:
         try:
-            url = f"{API_BASE_URL}/crypto/{coin}"
+            url = get_api_url('crypto', coin)
             response = await client.get(url)
             response.raise_for_status()
             data = response.json()
-            await message.answer(f"Coin {coin}: {html.bold(data.get('price', 'X'))}$")
-        except (httpx.HTTPError, KeyError, ValueError) as e:
-            logger.error(f"Failed to get crypto {coin}: {e}")
-            await message.answer(f"Failed to fetch crypto {coin}")
+            await message.answer(f"Coin {coin}: ${html.bold(data.get('price', 0.0))}")
+        except Exception as e:
+            logger.error(f"Failed to check crypto {coin}: {e}")
+            await message.answer(f"Failed to check crypto {coin}")
 
 @dp.message(Command('check_steam'))
-async def check_steam_handler(message: Message) -> None:
+async def check_steam_handler(message: Message):
     pattern = re.compile(r"^/check_steam\s+(\d+)\s+(.+)$")
     match = pattern.match(message.text.strip())
     if not match:
-        await message.answer("Please provide a valid app_id and steam market name!")
+        await message.answer("Please provide a valid app_id and Steam market name!")
         return
 
-    app_id = match.group(1)
+    app_id = int(match.group(1))
     market_name = unquote(match.group(2))
 
     async with httpx.AsyncClient() as client:
         try:
-            url = f"{API_BASE_URL}/steam/{app_id}/{market_name}"
+            url = get_api_url('steam', market_name, app_id)
             response = await client.get(url)
             response.raise_for_status()
             data = response.json()
-            price = data.get('price', 0.0)
-            await message.answer(f"Steam game: {app_id}, Steam item: {market_name}: {html.bold(price)}$")
-        except (httpx.HTTPError, KeyError, ValueError) as e:
-            logger.error(f"Failed to get Steam item {market_name}, app_id {app_id}: {e}")
-            await message.answer(f"Failed to fetch steam item {market_name} from {app_id}")
+            await message.answer(f"Steam item: {market_name}, app_id={app_id}: ${html.bold(data.get('price', 0.0))}")
+        except Exception as e:
+            logger.error(f"Failed to check Steam item {market_name}, app_id {app_id}: {e}")
+            await message.answer(f"Failed to check Steam item {market_name} from {app_id}")

@@ -1,12 +1,13 @@
-from aiogram import html
+from html import escape
 from aiogram.enums import ParseMode
 from aiogram.filters import Command
 from aiogram.types import Message
-from sqlalchemy import func, select, and_
 from sqlalchemy.exc import SQLAlchemyError
-from src.common import dp
-from src.dao.models import AsyncSessionLocal, User, Alert
+
+from src.dao.models import AsyncSessionLocal, User
+from src.bot_init import dp
 from src import (get_logger)
+
 
 logger = get_logger()
 
@@ -20,10 +21,14 @@ async def alerts_handler(message: Message, user: User):
 
             alert_text = "<b>📢 Your Alerts</b>\n\n"
             for alert in user.alerts:
-                asset = f"{alert.asset_name}" if not alert.app_id else f"{alert.asset_name}, app_id: {alert.app_id}"
+                asset = (
+                    f"{alert.asset_name}"
+                    if not alert.app_id else
+                    f"{alert.asset_name}, app_id={alert.app_id}"
+                )
 
                 alert_text += (
-                    f"#{alert.id}: {asset}, target {alert.direction} ${alert.target_price:.2f} "
+                    f"<b>#{alert.id}</b>: {asset}, target {escape(alert.direction)} <b>${alert.target_price:.2f}</b>\n"
                 )
 
             await message.answer(alert_text, parse_mode=ParseMode.HTML)

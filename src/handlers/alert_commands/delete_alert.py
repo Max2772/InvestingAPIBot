@@ -1,13 +1,14 @@
 import re
-from aiogram import html
 from aiogram.enums import ParseMode
 from aiogram.filters import Command
 from aiogram.types import Message
 from sqlalchemy import select, and_
 from sqlalchemy.exc import SQLAlchemyError
-from src.common import dp
+
 from src.dao.models import AsyncSessionLocal, User, Alert
+from src.bot_init import dp
 from src import (get_logger)
+
 
 logger = get_logger()
 
