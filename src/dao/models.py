@@ -47,9 +47,9 @@ class Alert(Base):
     asset_type = Column(String, nullable=False)
     asset_name = Column(String, nullable=False)
     target_price = Column(Numeric(precision=38, scale=18))
+    direction = Column(String, nullable=False, default='>')
     registered_at = Column(DateTime(timezone=True), default=lambda: datetime.now(tz=UTC))
     app_id = Column(Integer, nullable=True)
-
     user = relationship("User", back_populates="alerts", lazy="selectin")
 
     def __repr__(self):

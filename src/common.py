@@ -26,12 +26,12 @@ class ThrotllingMiddleware(BaseMiddleware):
 
         if check_user:
             if int(check_user.decode()) == 1:
-                await self.storage.redis.set(name=user, value=0, ex=5)
+                await self.storage.redis.set(name=user, value=0, ex=1)
                 return await event.answer("Too many requests! Try Later")
 
             return
 
-        await self.storage.redis.set(name=user, value=1, ex=5)
+        await self.storage.redis.set(name=user, value=1, ex=1)
         return await handler(event, data)
 
 bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))

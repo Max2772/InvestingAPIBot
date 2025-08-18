@@ -32,9 +32,9 @@ async def alerts_handler(message: Message) -> None:
             alert_text = "Alerts:\n\n"
 
             for alert in alerts:
-                alert_text += f"{alert.id}) {alert.asset_name}, target price: ${alert.target_price:.2f}\n"
+                alert_text += f"{alert.id}) {alert.asset_name}, target price {alert.direction} ${alert.target_price:.2f}\n"
 
-            await message.answer(alert_text, parse_mode=ParseMode.HTML)
+            await message.answer(alert_text, parse_mode=None)
 
         except SQLAlchemyError as e:
             logger.error(f"Database error while listing alerts: {e}")

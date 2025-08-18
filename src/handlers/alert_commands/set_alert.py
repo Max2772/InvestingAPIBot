@@ -15,7 +15,7 @@ logger = get_logger()
 
 @dp.message(Command('set_alert'))
 async def set_alert_handler(message: Message) -> None:
-    pattern = re.compile(r"^/set_alert\s+(stock|crypto|steam)(\s+\d+)?\s+(.+)\s+(\d+(\.\d+)?)$", re.IGNORECASE)
+    pattern = re.compile(r"^/set_alert\s+(stock|crypto|steam)(\s+\d+)?\s+(.+)\s+(>|>=|<|<=)\s+(\d+(\.\d+)?)$", re.IGNORECASE)
     match = pattern.match(message.text.strip())
     if not match:
         await message.answer("Please provide a valid asset type, name and amount!")
@@ -24,7 +24,8 @@ async def set_alert_handler(message: Message) -> None:
     asset_type = match.group(1).lower()
     app_id = int(match.group(2)) if match.group(2) else None
     asset_name = match.group(3).upper() if asset_type == "stock" else match.group(3)
-    price = Decimal(str(match.group(4)))
+    direction = match.group(4)
+    price = Decimal(str(match.group(5)))
 
 
     if price == 0:
@@ -54,6 +55,7 @@ async def set_alert_handler(message: Message) -> None:
                     asset_type=asset_type,
                     asset_name=name,
                     target_price=price,
+                    direction=direction,
                     app_id=app_id,
                 )
 
@@ -75,7 +77,7 @@ async def set_alert_handler(message: Message) -> None:
 
                 session.add(alert)
                 await session.commit()
-                await message.answer(f"Added alert for {alert.asset_name} with target price ${html.bold(price)}")
+                await message.answer(f"Added alert for {alert.asset_name}, with target price {direction} ${html.bold(price)}")
 
         except (httpx.HTTPError, KeyError, ValueError) as e:
           logger.error(f"Error adding alert: {str(e)}")

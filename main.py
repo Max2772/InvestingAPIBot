@@ -2,9 +2,11 @@ import asyncio
 import argparse
 from src import handlers # NoQa
 from src import (setup_logger)
+from src.tasks import (check_alerts)
 from src.common import bot, dp
 
 async def main() -> None:
+    asyncio.create_task(check_alerts())
     await dp.start_polling(bot)
 
 if __name__ == '__main__':
