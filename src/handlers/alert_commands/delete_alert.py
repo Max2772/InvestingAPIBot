@@ -11,9 +11,8 @@ from src import (get_logger)
 
 logger = get_logger()
 
-
 @dp.message(Command('delete_alert'))
-async def delete_alert_handler(message: Message) -> None:
+async def delete_alert_handler(message: Message, user: User) -> None:
     pattern = re.compile(r"^/delete_alert\s+(\d+)$", re.IGNORECASE)
     match = pattern.match(message.text.strip())
     if not match:
@@ -21,13 +20,7 @@ async def delete_alert_handler(message: Message) -> None:
         return
 
     alert_id = int(match.group(1))
-
     async with AsyncSessionLocal() as session:
-        user = await session.get(User, message.from_user.id)
-        if not user:
-            await message.answer(f"Sorry, to use this command, you need to first register(/register).")
-            return
-
         try:
             result = await session.execute(
                 select(Alert).where(
@@ -37,20 +30,22 @@ async def delete_alert_handler(message: Message) -> None:
                     )
                 )
             )
-
             alert = result.scalars().first()
 
             if not alert:
-                await message.answer(f"Alert with id {alert_id} does not exist.")
+                await message.answer(f"Alert #{alert_id} does not exist.")
                 return
 
             await session.delete(alert)
             await session.commit()
-            await message.answer(f"Deleted alert for {alert.asset_name} with id {alert.id}")
+            await message.answer(
+                f"🔔 Alert #{alert.id} for <b>{alert.asset_name}</b> deleted successfully.",
+                parse_mode=ParseMode.HTML
+            )
 
         except SQLAlchemyError as e:
-            logger.error(f"Database error while deleting alert with id {alert_id}: {e}")
-            await message.answer(f"Failed to delete alert with id {alert_id} due to database error.")
+            logger.error(f"Database error while deleting alert #{alert_id}: {e}")
+            await message.answer(f"Failed to delete alert #{alert_id} due to database error.")
         except Exception as e:
-            logger.error(f"Failed to delete alert with id {alert_id}: {e}")
-            await message.answer(f"Failed to delete alert with id {alert_id}.")
+            logger.error(f"Failed to delete alert #{alert_id}: {e}")
+            await message.answer(f"Failed to delete alert #{alert_id}.")

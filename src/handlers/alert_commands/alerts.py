@@ -11,30 +11,22 @@ from src import (get_logger)
 logger = get_logger()
 
 @dp.message(Command('alerts'))
-async def alerts_handler(message: Message) -> None:
-    async with (AsyncSessionLocal() as session):
+async def alerts_handler(message: Message, user: User):
+    async with AsyncSessionLocal() as session:
         try:
-            user = await session.get(User, message.from_user.id)
-            if not user:
-                await message.answer(f"Please register first (/register).")
-                return
-
             if not user.alerts:
                 await message.answer("You have no active alerts.")
                 return
 
-            result = await session.execute(
-                select(Alert).where(Alert.user_id == user.telegram_id) # NoQa
-            )
+            alert_text = "<b>📢 Your Alerts</b>\n\n"
+            for alert in user.alerts:
+                asset = f"{alert.asset_name}" if not alert.app_id else f"{alert.asset_name}, app_id: {alert.app_id}"
 
-            alerts = result.scalars()
+                alert_text += (
+                    f"#{alert.id}: {asset}, target {alert.direction} ${alert.target_price:.2f} "
+                )
 
-            alert_text = "Alerts:\n\n"
-
-            for alert in alerts:
-                alert_text += f"{alert.id}) {alert.asset_name}, target price {alert.direction} ${alert.target_price:.2f}\n"
-
-            await message.answer(alert_text, parse_mode=None)
+            await message.answer(alert_text, parse_mode=ParseMode.HTML)
 
         except SQLAlchemyError as e:
             logger.error(f"Database error while listing alerts: {e}")
