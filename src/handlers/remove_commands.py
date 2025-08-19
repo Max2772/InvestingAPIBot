@@ -9,7 +9,7 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from src.dao.models import AsyncSessionLocal, User, Portfolio
 from src.bot_init import dp
-from src import (get_api_url, get_logger)
+from src import (get_api_url, get_logger, fetch_api_data)
 
 
 logger = get_logger()
@@ -82,13 +82,10 @@ async def remove_crypto_handler(message: Message, user: User):
         async with httpx.AsyncClient() as client:
             try:
                 url = get_api_url('crypto', coin)
-                response = await client.get(url)
-                if response.status_code == 404:
-                    await message.answer("Sorry, this asset doesn't exist.")
+                data = await fetch_api_data(client, url, message)
+                if data is None:
                     return
 
-                response.raise_for_status()
-                data = response.json()
                 name = str(data.get('name', coin))
 
                 result = await session.execute(

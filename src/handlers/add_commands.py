@@ -9,7 +9,7 @@ from sqlalchemy import select, and_
 
 from src.dao.models import AsyncSessionLocal, User, Portfolio
 from src.bot_init import dp
-from src import (get_logger, get_api_url)
+from src import (get_logger, get_api_url, fetch_api_data)
 
 
 logger = get_logger()
@@ -33,9 +33,10 @@ async def add_stock_handler(message: Message, user: User):
         async with httpx.AsyncClient() as client:
             try:
                 url = get_api_url('stock', ticker)
-                response = await client.get(url)
-                response.raise_for_status()
-                data = response.json()
+                data = await fetch_api_data(client, url, message)
+                if data is None:
+                    return
+
                 price = Decimal(str(data.get('price', 0.0)))
 
                 portfolio = Portfolio(
@@ -88,9 +89,10 @@ async def add_crypto_handler(message: Message, user: User):
         async with httpx.AsyncClient() as client:
             try:
                 url = get_api_url('crypto', coin)
-                response = await client.get(url)
-                response.raise_for_status()
-                data = response.json()
+                data = await fetch_api_data(client, url, message)
+                if data is None:
+                    return
+
                 price = Decimal(str(data.get('price', 0.0)))
                 name = str(data.get('name', coin))
 
@@ -146,9 +148,10 @@ async def add_steam_handler(message: Message, user: User) -> None:
         async with httpx.AsyncClient() as client:
             try:
                 url = get_api_url('steam', market_name, app_id)
-                response = await client.get(url)
-                response.raise_for_status()
-                data = response.json()
+                data = await fetch_api_data(client, url, message)
+                if data is None:
+                    return
+
                 price = Decimal(str(data.get('price', 0.0)))
 
                 portfolio = Portfolio(
