@@ -10,7 +10,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from src.dao.models import AsyncSessionLocal, User, Alert
 from src.bot_init import dp
 from src.config import MAXIMUM_ALERTS
-from src import (get_logger, get_api_url)
+from src import (get_logger, get_api_url, fetch_api_data)
 
 
 logger = get_logger()
@@ -48,13 +48,10 @@ async def set_alert_handler(message: Message, user: User):
 
             async with httpx.AsyncClient() as client:
                 url = get_api_url(asset_type, asset_name, app_id)
-                response = await client.get(url)
-                if response.status_code == 404:
-                    await message.answer("Sorry, this asset doesn't exist.")
+                data = await fetch_api_data(client, url, message)
+                if data is None:
                     return
 
-                response.raise_for_status()
-                data = response.json()
                 name = str(data.get('name', asset_name))
 
                 alert = Alert(

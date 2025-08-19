@@ -6,7 +6,7 @@ from aiogram.filters import Command
 from aiogram.types import Message
 
 from src.bot_init import dp
-from src import (get_logger, get_api_url)
+from src import (get_logger, get_api_url, fetch_api_data)
 
 
 logger = get_logger()
@@ -24,9 +24,10 @@ async def check_stock_handler(message: Message):
     async with httpx.AsyncClient() as client:
         try:
             url = get_api_url('stock', ticker)
-            response = await client.get(url)
-            response.raise_for_status()
-            data = response.json()
+            data = await fetch_api_data(client, url, message)
+            if data is None:
+                return
+
             await message.answer(f"Stock ticker {ticker}: ${html.bold(data.get('price', 0.0))}")
         except Exception as e:
             logger.error(f"Failed to check stock {ticker}: {e}")
@@ -45,9 +46,10 @@ async def check_crypto_handler(message: Message):
     async with httpx.AsyncClient() as client:
         try:
             url = get_api_url('crypto', coin)
-            response = await client.get(url)
-            response.raise_for_status()
-            data = response.json()
+            data = await fetch_api_data(client, url, message)
+            if data is None:
+                return
+
             await message.answer(f"Coin {coin}: ${html.bold(data.get('price', 0.0))}")
         except Exception as e:
             logger.error(f"Failed to check crypto {coin}: {e}")
@@ -67,9 +69,10 @@ async def check_steam_handler(message: Message):
     async with httpx.AsyncClient() as client:
         try:
             url = get_api_url('steam', market_name, app_id)
-            response = await client.get(url)
-            response.raise_for_status()
-            data = response.json()
+            data = await fetch_api_data(client, url, message)
+            if data is None:
+                return
+
             await message.answer(f"Steam item: {market_name}, app_id={app_id}: ${html.bold(data.get('price', 0.0))}")
         except Exception as e:
             logger.error(f"Failed to check Steam item {market_name}, app_id {app_id}: {e}")
