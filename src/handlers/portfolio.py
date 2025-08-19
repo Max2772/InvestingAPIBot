@@ -6,10 +6,11 @@ from aiogram.filters import Command
 from aiogram.types import Message
 from sqlalchemy import func, select
 from sqlalchemy.exc import SQLAlchemyError
-from src.common import dp
+
 from src.dao.models import AsyncSessionLocal, User, Portfolio
-from src import (get_logger, profit_emoji, profit_sign)
-from src.common import API_BASE_URL
+from src.bot_init import dp
+from src import (get_api_url, get_logger, profit_emoji, profit_sign)
+
 
 logger = get_logger()
 
@@ -23,24 +24,19 @@ mode_titles = {
 }
 
 @dp.message(Command('portfolio'))
-async def portfolio_handler(message: Message) -> None:
+async def portfolio_handler(message: Message, user: User) -> None:
     pattern = re.compile(r"^/portfolio\s+(all|stocks|crypto|steam)$")
     match = re.match(pattern, message.text.strip())
-    mode = match.group(1) if match and match.group(1) in PORTFOLIO_SETTINGS else 'all'
     if not match:
         await message.answer("Please provide a parameter, e.g., /portfolio all")
         return
 
+    mode = match.group(1) if match and match.group(1) in PORTFOLIO_SETTINGS else 'all'
     if mode == 'stocks':
         mode = 'stock'
 
-    async with (AsyncSessionLocal() as session):
+    async with AsyncSessionLocal() as session:
         try:
-            user = await session.get(User, message.from_user.id)
-            if not user:
-                await message.answer(f"Please register first (/register).")
-                return
-
             if not user.portfolios:
                 await message.answer("Your portfolio is empty. Add assets with /add_stock, /add_crypto, or /add_steam.")
                 return
@@ -50,7 +46,6 @@ async def portfolio_handler(message: Message) -> None:
             crypto_text = "<b>₿  Crypto</b>\n"
             steam_text = "<b>🎮  Steam Items</b>\n"
 
-
             total_old_value = Decimal('0')
             total_current_value = Decimal('0')
 
@@ -59,7 +54,7 @@ async def portfolio_handler(message: Message) -> None:
             )
             total_steps = result.scalar() or 0
             step = 1
-            msg = await message.answer("Loading 0%")
+            loading_message = await message.answer('Loading 0%')
 
             async with httpx.AsyncClient() as client:
                 for portfolio in user.portfolios:
@@ -68,14 +63,14 @@ async def portfolio_handler(message: Message) -> None:
                         quantity = Decimal(str(portfolio.quantity))
                         asset_type = portfolio.asset_type
                         asset_name = portfolio.asset_name
-                        app_id = portfolio.app_id
+                        app_id = int(portfolio.app_id)
 
                         try:
-                            url = f"{API_BASE_URL}/{asset_type}/{asset_name}" if app_id is None else f"{API_BASE_URL}/{asset_type}/{app_id}/{asset_name}"
+                            url = get_api_url(asset_type, asset_name, app_id)
                             response = await client.get(url)
                             response.raise_for_status()
                             data = response.json()
-                            current_price = Decimal(str(data.get('price', 0)))
+                            current_price = Decimal(str(data.get('price', 0.0)))
                             if current_price == 0:
                                 logger.warning(f"No valid price for {asset_type}:{asset_name}")
                                 continue
@@ -96,14 +91,14 @@ async def portfolio_handler(message: Message) -> None:
                             stock_text += asset_text
                         elif asset_type == 'crypto':
                             crypto_text += asset_text
-                        else:
+                        elif asset_type == 'steam':
                             steam_text += asset_text
 
                     percent = int(step / total_steps * 100)
-                    bar = "█" * (percent // 10) + "░" * (10 - percent // 10)
-                    await msg.edit_text(f"Loading {percent}%\n[{bar}]")
+                    bar = '█' * (percent // 10) + '░' * (10 - percent // 10)
+                    await loading_message.edit_text(f"Loading {percent}%\n[{bar}]")
                     step += 1
-            await msg.delete()
+            await loading_message.delete()
 
             if mode == 'stock':
                 portfolio_text += stock_text + '\n'

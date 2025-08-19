@@ -1,10 +1,12 @@
 from aiogram.enums import ParseMode
 from aiogram.filters import Command
 from aiogram.types import Message
-from src.common import dp
+
+from src.bot_init import dp
+
 
 @dp.message(Command('help'))
-async def help_handler(message: Message) -> None:
+async def help_handler(message: Message):
     help_text = (
         "<b>📚 Bot Commands</b>\n\n"
         "<b>ℹ️ Help</b>\n"
@@ -24,9 +26,16 @@ async def help_handler(message: Message) -> None:
         "  /remove_steam <code>app_id</code> <code>market_name</code> <code>quantity</code> - Remove Steam item from portfolio\n"
         "  /portfolio <code>all|stocks|crypto|steam|total</code> - View portfolio (e.g., /portfolio stocks)\n\n"
         "<b>🔔 Price Alerts</b>\n"
-        "  /alert <code>ticker|coin|steam item</code> <code>price</code> - Set price alert (e.g., /alert AMD 200)\n"
-        "  /alert list - Show all active alerts\n"
-        "  /alert remove <code>id</code> - Remove alert by ID (e.g., /alert remove 1)\n\n"
+        "<b>/set_alert</b> <code>asset_type</code> [<code>app_id</code>] <code>asset_name</code> <code>condition</code> <code>price</code> - Set a price alert\n"
+        "  • <b>asset_type</b>: <code>stock</code>, <code>crypto</code>, or <code>steam</code>\n"
+        "  • <b>app_id</b>: Required for Steam items (e.g., <code>730</code> for CS:GO)\n"
+        "  • <b>condition</b>: <code>&gt;</code>, <code>&gt;=</code>, <code>&lt;</code>, or <code>&lt;=</code>\n"
+
+        "  • Example: <code>/set_alert stock AMD > 200</code>\n"
+        "  • Example: <code>/set_alert steam 730 Glove Case > 5</code>\n\n"
+        "<b>/alerts</b> - Show all active alerts\n"
+        "<b>/delete_alert</b> <code>id</code> - Remove an alert by ID\n"
+        "  • Example: <code>/delete_alert 1</code>\n\n"
         "<b>📜 History</b>\n"
         "  /history <code>all|stocks|crypto|steam</code> - View purchase history (e.g., /history stocks)\n\n"
         "◇───────────────────────────────────────────◇\n"

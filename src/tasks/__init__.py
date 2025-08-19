@@ -1,0 +1,1 @@
+from src.tasks.alert_checker import check_alerts

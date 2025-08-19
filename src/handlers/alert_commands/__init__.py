@@ -1,0 +1,3 @@
+from src.handlers.alert_commands.alerts import alerts_handler
+from src.handlers.alert_commands.delete_alert import delete_alert_handler
+from src.handlers.alert_commands.set_alert import set_alert_handler

@@ -5,5 +5,4 @@ redis
 dotenv
 sqlalchemy
 alembic
-psycopg2-binary
-asyncpg
+aiosqlite

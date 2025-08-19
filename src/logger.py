@@ -1,14 +1,15 @@
 import logging
 from logging.handlers import RotatingFileHandler
 
+
 LOG_LEVEL_MAPPING = {
-    "DEBUG": logging.DEBUG,
-    "INFO": logging.INFO,
-    "WARNING": logging.WARNING,
-    "WARN": logging.WARNING,
-    "ERROR": logging.ERROR,
-    "FATAL": logging.CRITICAL,
-    "CRITICAL": logging.CRITICAL,
+    'DEBUG': logging.DEBUG,
+    'INFO': logging.INFO,
+    'WARNING': logging.WARNING,
+    'WARN': logging.WARNING,
+    'ERROR': logging.ERROR,
+    'FATAL': logging.CRITICAL,
+    'CRITICAL': logging.CRITICAL,
 }
 
 _logger = None
@@ -34,7 +35,7 @@ def setup_logger(log_level = logging.INFO):
     _logger.addHandler(console_handler)
 
     file_handler = RotatingFileHandler(
-        'logs.log', maxBytes=2*1024*1024, backupCount=3, encoding="utf-8", errors="replace"
+        'logs.log', maxBytes=2*1024*1024, backupCount=3, encoding='utf-8', errors='replace'
     )
     file_handler.setLevel(log_level)
     if log_level == logging.INFO:
@@ -44,7 +45,7 @@ def setup_logger(log_level = logging.INFO):
                                                     '%(module)s.%(funcName)s:%(lineno)d - %(message)s'))
     _logger.addHandler(file_handler)
 
-    _logger.info("Loger initialized")
+    _logger.info('Loger initialized')
     return _logger
 
 def get_logger():
