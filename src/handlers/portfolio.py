@@ -63,7 +63,7 @@ async def portfolio_handler(message: Message, user: User) -> None:
                         quantity = Decimal(str(portfolio.quantity))
                         asset_type = portfolio.asset_type
                         asset_name = portfolio.asset_name
-                        app_id = int(portfolio.app_id)
+                        app_id = portfolio.app_id
 
                         try:
                             url = get_api_url(asset_type, asset_name, app_id)
