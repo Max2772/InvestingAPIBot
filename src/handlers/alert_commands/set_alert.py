@@ -87,7 +87,7 @@ async def set_alert_handler(message: Message, user: User):
                 await session.commit()
                 await message.answer(
                     f"🔔 Alert created for <b>{name}</b> ({asset_type.capitalize()}) "
-                    f"with target {html.escape(direction)} ${price:.2f}.",
+                    f"with target {escape(direction)} ${price:.2f}.",
                     parse_mode=ParseMode.HTML
                 )
         except SQLAlchemyError as e:
