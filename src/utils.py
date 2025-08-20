@@ -1,5 +1,8 @@
 from src.config import API_BASE_URL
+from src import (get_logger)
 
+
+logger = get_logger()
 
 def profit_emoji(value):
     return ' 📈' if value > 0 else ' 📉' if value < 0 else ''
@@ -19,9 +22,12 @@ async def fetch_api_data(client, url, message):
         response = await client.get(url)
         if response.status_code == 404:
             await message.answer("Sorry, this asset doesn't exist.")
+            logger.warning('Asset not found.')
             return None
         response.raise_for_status()
         return response.json()
     except Exception as e:
         await message.answer(f"Error fetching data: {str(e)}")
+        logger.error(f"Error fetching data: {str(e)}")
+        await message.answer('Error fetching data')
         return None
