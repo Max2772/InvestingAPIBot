@@ -2,7 +2,7 @@ import asyncio
 import operator
 from decimal import Decimal
 from html import escape
-import httpx
+import aiohttp
 from aiogram.enums import ParseMode
 from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
@@ -26,7 +26,7 @@ async def check_alerts():
     while True:
         try:
             logger.info('Checking alerts...')
-            async with (AsyncSessionLocal() as session):
+            async with AsyncSessionLocal() as session:
                 result = await session.execute(select(Alert))
                 alerts = result.scalars().all()
 
@@ -35,7 +35,7 @@ async def check_alerts():
                     await asyncio.sleep(ALERT_INTERVAL_SECONDS)
                     continue
 
-                async with httpx.AsyncClient() as client:
+                async with aiohttp.ClientSession() as client:
                     for alert in alerts:
                         try:
                             asset_type = alert.asset_type
@@ -43,29 +43,28 @@ async def check_alerts():
                             app_id = alert.app_id
 
                             url = get_api_url(asset_type, asset_name, app_id)
+                            async with client.get(url) as response:
+                                response.raise_for_status()
+                                data = await response.json()
+                                price = Decimal(str(data.get('price', 0.0)))
 
-                            response = await client.get(url)
-                            response.raise_for_status()
-                            data = response.json()
-                            price = Decimal(str(data.get('price', 0.0)))
+                                if ops[alert.direction](price, alert.target_price):
+                                    asset = f"{asset_name}, app id = {app_id}" if app_id else f"{asset_name}"
+                                    message = (
+                                        f"<b>🔔 Alert Triggered!</b>\n"
+                                        f"Asset: <b>{asset}</b>\n"
+                                        f"Current price: <b>${price:.2f}</b>\n"
+                                        f"Target: {escape(alert.direction)} <b>${alert.target_price:.2f}</b>"
+                                    )
 
-                            if ops[alert.direction](price, alert.target_price):
-                                asset = f"{asset_name}, app id = {app_id}" if app_id else f"{asset_name}"
-                                message = (
-                                    f"<b>🔔 Alert Triggered!</b>\n"
-                                    f"Asset: <b>{asset}</b>\n"
-                                    f"Current price: <b>${price:.2f}</b>\n"
-                                    f"Target: {escape(alert.direction)} <b>${alert.target_price:.2f}</b>"
-                                )
-
-                                await bot.send_message(alert.user_id, message, parse_mode=ParseMode.HTML)
-                                await session.delete(alert)
-                                await session.commit()
-                                logger.info(f"Alert {alert.id} triggered for {asset_type}:{asset_name}, user_id: {alert.user_id}")
-                        except httpx.HTTPStatusError as e:
+                                    await bot.send_message(alert.user_id, message, parse_mode=ParseMode.HTML)
+                                    await session.delete(alert)
+                                    await session.commit()
+                                    logger.info(f"Alert {alert.id} triggered for {asset_type}:{asset_name}, user_id: {alert.user_id}")
+                        except aiohttp.ClientResponseError as e:
                             logger.error(f"HTTP error for alert {alert.id} ({asset_type}:{asset_name}, user_id: {alert.user_id}): {e}")
                             continue
-                        except (httpx.RequestError, ValueError, KeyError) as e:
+                        except (aiohttp.ClientError, aiohttp.ContentTypeError, ValueError, KeyError) as e:
                             logger.error(f"Error fetching price for alert {alert.id} ({asset_type}:{asset_name}, user_id: {alert.user_id}): {e}")
                             continue
         except SQLAlchemyError as e:

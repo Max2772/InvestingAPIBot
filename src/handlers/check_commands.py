@@ -1,6 +1,6 @@
 import re
 from urllib.parse import unquote
-import httpx
+import aiohttp
 from aiogram import html
 from aiogram.filters import Command
 from aiogram.types import Message
@@ -21,17 +21,17 @@ async def check_stock_handler(message: Message):
 
     ticker = match.group(1).upper()
 
-    async with httpx.AsyncClient() as client:
-        try:
-            url = get_api_url('stock', ticker)
+    try:
+        url = get_api_url('stock', ticker)
+        async with aiohttp.ClientSession() as client:
             data = await fetch_api_data(client, url, message)
             if data is None:
                 return
 
             await message.answer(f"Stock ticker {ticker}: ${html.bold(data.get('price', 0.0))}")
-        except Exception as e:
-            logger.error(f"Failed to check stock {ticker}: {e}")
-            await message.answer(f"Failed to check stock {ticker}")
+    except Exception as e:
+                logger.error(f"Failed to check stock {ticker}: {e}")
+                await message.answer(f"Failed to check stock {ticker}")
 
 @dp.message(Command('check_crypto'))
 async def check_crypto_handler(message: Message):
@@ -43,17 +43,17 @@ async def check_crypto_handler(message: Message):
 
     coin = match.group(1)
 
-    async with httpx.AsyncClient() as client:
-        try:
-            url = get_api_url('crypto', coin)
+    try:
+        url = get_api_url('crypto', coin)
+        async with aiohttp.ClientSession() as client:
             data = await fetch_api_data(client, url, message)
             if data is None:
                 return
 
             await message.answer(f"Coin {coin}: ${html.bold(data.get('price', 0.0))}")
-        except Exception as e:
-            logger.error(f"Failed to check crypto {coin}: {e}")
-            await message.answer(f"Failed to check crypto {coin}")
+    except Exception as e:
+                logger.error(f"Failed to check crypto {coin}: {e}")
+                await message.answer(f"Failed to check crypto {coin}")
 
 @dp.message(Command('check_steam'))
 async def check_steam_handler(message: Message):
@@ -66,14 +66,14 @@ async def check_steam_handler(message: Message):
     app_id = int(match.group(1))
     market_name = unquote(match.group(2))
 
-    async with httpx.AsyncClient() as client:
-        try:
-            url = get_api_url('steam', market_name, app_id)
+    try:
+        url = get_api_url('steam', market_name, app_id)
+        async with aiohttp.ClientSession() as client:
             data = await fetch_api_data(client, url, message)
             if data is None:
                 return
 
-            await message.answer(f"Steam item: {market_name}, app_id={app_id}: ${html.bold(data.get('price', 0.0))}")
-        except Exception as e:
-            logger.error(f"Failed to check Steam item {market_name}, app_id {app_id}: {e}")
-            await message.answer(f"Failed to check Steam item {market_name} from {app_id}")
+            await message.answer(f"Steam item: {market_name}\napp_id: {app_id}\nPrice: ${html.bold(data.get('price', 0.0))}")
+    except Exception as e:
+        logger.error(f"Failed to check Steam item {market_name}, app_id {app_id}: {e}")
+        await message.answer(f"Failed to check Steam item {market_name} from {app_id}")

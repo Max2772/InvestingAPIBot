@@ -1,5 +1,5 @@
 import re
-import httpx
+import aiohttp
 from decimal import Decimal
 from urllib.parse import unquote
 from aiogram import html
@@ -28,10 +28,9 @@ async def add_stock_handler(message: Message, user: User):
     if amount <= 0:
         await message.answer('Amount must be positive!')
         return
-
-    async with AsyncSessionLocal() as session:
-        async with httpx.AsyncClient() as client:
-            try:
+    try:
+        async with AsyncSessionLocal() as session:
+            async with aiohttp.ClientSession() as client:
                 url = get_api_url('stock', ticker)
                 data = await fetch_api_data(client, url, message)
                 if data is None:
@@ -66,9 +65,9 @@ async def add_stock_handler(message: Message, user: User):
 
                 await session.commit()
                 await message.answer(f"Added {amount} {ticker} at {html.bold(price)}$")
-            except Exception as e:
-                logger.error(f"Error adding stock {ticker}: {e}")
-                await message.answer(f"Failed to add stock {ticker}")
+    except Exception as e:
+        logger.error(f"Error adding stock {ticker}: {e}")
+        await message.answer(f"Failed to add stock {ticker}")
 
 @dp.message(Command('add_crypto'))
 async def add_crypto_handler(message: Message, user: User):
@@ -85,9 +84,9 @@ async def add_crypto_handler(message: Message, user: User):
         await message.answer('Amount must be positive!')
         return
 
-    async with AsyncSessionLocal() as session:
-        async with httpx.AsyncClient() as client:
-            try:
+    try:
+        async with AsyncSessionLocal() as session:
+            async with aiohttp.ClientSession() as client:
                 url = get_api_url('crypto', coin)
                 data = await fetch_api_data(client, url, message)
                 if data is None:
@@ -124,9 +123,9 @@ async def add_crypto_handler(message: Message, user: User):
 
                 await session.commit()
                 await message.answer(f"Added {amount} {coin} at {html.bold(price)}$")
-            except Exception as e:
-                logger.error(f"Error adding crypto {coin}: {e}")
-                await message.answer(f"Failed to add crypto {coin}")
+    except Exception as e:
+        logger.error(f"Error adding crypto {coin}: {e}")
+        await message.answer(f"Failed to add crypto {coin}")
 
 @dp.message(Command('add_steam'))
 async def add_steam_handler(message: Message, user: User) -> None:
@@ -144,9 +143,9 @@ async def add_steam_handler(message: Message, user: User) -> None:
         await message.answer('Amount must be positive!')
         return
 
-    async with AsyncSessionLocal() as session:
-        async with httpx.AsyncClient() as client:
-            try:
+    try:
+        async with AsyncSessionLocal() as session:
+            async with aiohttp.ClientSession() as client:
                 url = get_api_url('steam', market_name, app_id)
                 data = await fetch_api_data(client, url, message)
                 if data is None:
@@ -184,6 +183,6 @@ async def add_steam_handler(message: Message, user: User) -> None:
 
                 await session.commit()
                 await message.answer(f"Added {amount} {market_name} at {html.bold(price)}$")
-            except Exception as e:
-                logger.error(f"Error adding Steam item {market_name}, app_id={app_id}: {e}")
-                await message.answer(f"Failed to add Steam item {market_name}, app_id={app_id}")
+    except Exception as e:
+        logger.error(f"Error adding Steam item {market_name}, app_id={app_id}: {e}")
+        await message.answer(f"Failed to add Steam item {market_name}, app_id={app_id}")

@@ -1,6 +1,6 @@
 import re
 from decimal import Decimal
-import httpx
+import aiohttp
 from aiogram.enums import ParseMode
 from aiogram.filters import Command
 from aiogram.types import Message
@@ -9,7 +9,7 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from src.dao.models import AsyncSessionLocal, User, Portfolio
 from src.bot_init import dp
-from src import (get_api_url, get_logger, profit_emoji, profit_sign)
+from src import (get_api_url, get_logger, profit_emoji, profit_sign, fetch_api_data)
 
 
 logger = get_logger()
@@ -56,7 +56,7 @@ async def portfolio_handler(message: Message, user: User) -> None:
             step = 1
             loading_message = await message.answer('Loading 0%')
 
-            async with httpx.AsyncClient() as client:
+            async with aiohttp.ClientSession() as client:
                 for portfolio in user.portfolios:
                     if portfolio.asset_type == mode or mode == 'all':
                         buy_price = Decimal(str(portfolio.buy_price))
@@ -67,9 +67,10 @@ async def portfolio_handler(message: Message, user: User) -> None:
 
                         try:
                             url = get_api_url(asset_type, asset_name, app_id)
-                            response = await client.get(url)
-                            response.raise_for_status()
-                            data = response.json()
+                            data = await fetch_api_data(client, url, message)
+                            if data is None:
+                                continue
+
                             current_price = Decimal(str(data.get('price', 0.0)))
                             if current_price == 0:
                                 logger.warning(f"No valid price for {asset_type}:{asset_name}")
@@ -109,7 +110,7 @@ async def portfolio_handler(message: Message, user: User) -> None:
             else:
                 portfolio_text += stock_text + '\n' + crypto_text + '\n' + steam_text + '\n'
 
-            total_percent_change = ((total_current_value - total_old_value) / total_old_value) * 100
+            total_percent_change = ((total_current_value - total_old_value) / total_old_value) * 100 if total_old_value != 0 else Decimal('0')
             portfolio_text += ("◇───────────────────────────────────────────◇\n\n"
                                f"<b>💰 Total value: ${total_current_value:.2f}</b>\n"
                                f"<b>📊 Total growth: {total_percent_change:+.2f}%{profit_emoji(total_percent_change)}</b>")

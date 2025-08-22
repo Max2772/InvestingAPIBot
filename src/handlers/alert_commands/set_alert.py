@@ -1,6 +1,6 @@
 import re
 from decimal import Decimal
-import httpx
+import aiohttp
 from html import escape
 from aiogram.enums import ParseMode
 from aiogram.filters import Command
@@ -47,7 +47,7 @@ async def set_alert_handler(message: Message, user: User):
                 )
                 return
 
-            async with httpx.AsyncClient() as client:
+            async with aiohttp.ClientSession() as client:
                 url = get_api_url(asset_type, asset_name, app_id)
                 data = await fetch_api_data(client, url, message)
                 if data is None:
