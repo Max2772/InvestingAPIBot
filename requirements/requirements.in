@@ -1,6 +1,6 @@
 pip-tools
 aiogram
-httpx
+aiohttp
 redis
 dotenv
 sqlalchemy
