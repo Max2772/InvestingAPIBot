@@ -1,7 +1,7 @@
 import re
 from decimal import Decimal
 from urllib.parse import unquote
-import httpx
+import aiohttp
 from aiogram.filters import Command
 from aiogram.types import Message
 from sqlalchemy import select, and_
@@ -78,9 +78,9 @@ async def remove_crypto_handler(message: Message, user: User):
         await message.answer('Amount must be positive!')
         return
 
-    async with AsyncSessionLocal() as session:
-        async with httpx.AsyncClient() as client:
-            try:
+    try:
+        async with AsyncSessionLocal() as session:
+            async with aiohttp.ClientSession() as client:
                 url = get_api_url('crypto', coin)
                 data = await fetch_api_data(client, url, message)
                 if data is None:
@@ -113,12 +113,12 @@ async def remove_crypto_handler(message: Message, user: User):
 
                 await session.commit()
                 await message.answer(f"Removed {amount} {coin} from portfolio")
-            except SQLAlchemyError as e:
-                logger.error(f"Database error while removing crypto {coin}: {e}")
-                await message.answer(f"Failed to remove crypto {coin} due to database error.")
-            except Exception as e:
-                logger.error(f"Failed to remove crypto {coin}: {e}")
-                await message.answer(f"Failed to remove crypto {coin}.")
+    except SQLAlchemyError as e:
+        logger.error(f"Database error while removing crypto {coin}: {e}")
+        await message.answer(f"Failed to remove crypto {coin} due to database error.")
+    except Exception as e:
+        logger.error(f"Failed to remove crypto {coin}: {e}")
+        await message.answer(f"Failed to remove crypto {coin}.")
 
 @dp.message(Command('remove_steam'))
 async def remove_steam_handler(message: Message, user: User):
