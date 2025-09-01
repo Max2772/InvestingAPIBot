@@ -9,14 +9,13 @@ from sqlalchemy import select, and_
 
 from src.dao.models import AsyncSessionLocal, User, Portfolio
 from src.bot_init import dp
-from src import (get_logger, get_api_url, fetch_api_data, science_price_pattern, float_price_pattern,
-                 integer_price_pattern)
+from src import (get_logger, get_api_url, fetch_api_data, science_price_pattern, float_price_pattern)
 
 logger = get_logger()
 
 @dp.message(Command('add_stock'))
 async def add_stock_handler(message: Message, user: User):
-    pattern = re.compile(rf"^/add_stock\s+(.+)\s+{float_price_pattern}(\s+-p\s+{float_price_pattern})?$")
+    pattern = re.compile(rf"^/add_stock\s+([A-Za-z0-9.]+)\s+({float_price_pattern})\s*(?:-p\s+({float_price_pattern}))?$")
     match = pattern.match(message.text.strip())
     if not match:
         await message.answer("Please provide a valid ticker and amount!")
@@ -24,7 +23,7 @@ async def add_stock_handler(message: Message, user: User):
 
     ticker = match.group(1).upper()
     amount = Decimal(str(match.group(2)))
-    parameter_price = Decimal(str(match.group(4))) if match.group(4) else None
+    parameter_price = Decimal(str(match.group(3))) if match.group(3) else None
 
     if amount <= 0:
         await message.answer('Amount must be positive!')
@@ -81,7 +80,7 @@ async def add_stock_handler(message: Message, user: User):
 
 @dp.message(Command('add_crypto'))
 async def add_crypto_handler(message: Message, user: User):
-    pattern = re.compile(rf"^/add_crypto\s+(.+)\s+{science_price_pattern}(\s+-p\s+{science_price_pattern})?$")
+    pattern = re.compile(rf"^/add_crypto\s+([A-Za-z0-9. ]+)\s+({science_price_pattern})\s*(?:-p\s+({science_price_pattern}))?$")
     match = pattern.match(message.text.strip())
     if not match:
         await message.answer("Please provide a valid coin and amount!")
@@ -89,7 +88,7 @@ async def add_crypto_handler(message: Message, user: User):
 
     coin = match.group(1).upper()
     amount = Decimal(str(match.group(2)))
-    parameter_price = Decimal(str(match.group(4))) if match.group(4) else None
+    parameter_price = Decimal(str(match.group(3))) if match.group(3) else None
 
     if amount <= 0:
         await message.answer('Amount must be positive!')
@@ -101,16 +100,13 @@ async def add_crypto_handler(message: Message, user: User):
 
     try:
         async with AsyncSessionLocal() as session:
-            if parameter_price is not None:
-                price = parameter_price
-            else:
-                async with aiohttp.ClientSession() as client:
-                    url = get_api_url('crypto', coin)
-                    data = await fetch_api_data(client, url, message)
-                    if data is None:
-                        return
+            async with aiohttp.ClientSession() as client:
+                url = get_api_url('crypto', coin)
+                data = await fetch_api_data(client, url, message)
+                if data is None:
+                    return
 
-                    price = Decimal(str(data.get('price', 0.0)))
+                price = Decimal(str(data.get('price', 0.0))) if parameter_price is None else parameter_price
 
             name = str(data.get('name', coin))
 
@@ -148,7 +144,7 @@ async def add_crypto_handler(message: Message, user: User):
 
 @dp.message(Command('add_steam'))
 async def add_steam_handler(message: Message, user: User) -> None:
-    pattern = re.compile(rf"^/add_steam\s+{integer_price_pattern}\s+(.+)\s+{integer_price_pattern}(\s+-p\s+{float_price_pattern})?$")
+    pattern = re.compile(rf"^/add_steam\s+(\d+)\s+(.+)\s+(\d+)\s*(?:-p\s+({float_price_pattern}))?$")
     match = pattern.match(message.text.strip())
     if not match:
         await message.answer("Please provide a valid app_id, market name and amount!")
@@ -157,7 +153,7 @@ async def add_steam_handler(message: Message, user: User) -> None:
     app_id = int(match.group(1))
     market_name = unquote(match.group(2))
     amount = Decimal(str(match.group(3)))
-    parameter_price = Decimal(str(match.group(5))) if match.group(4) else None
+    parameter_price = Decimal(str(match.group(4))) if match.group(4) else None
 
     if amount <= 0 or app_id <= 0:
         await message.answer('Amount and app id must be positive!')
