@@ -1,9 +1,0 @@
-pip-tools
-aiogram
-aiohttp
-redis
-dotenv
-sqlalchemy
-alembic
-psycopg2-binary
-asyncpg
