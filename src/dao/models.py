@@ -58,14 +58,22 @@ class Alert(Base):
         return f"<Alert(id={self.id}, user_id={self.user_id}, name='{self.asset_name}', alert_price={self.alert_price})>"
 
 
+DATABASE_URL = os.getenv(
+    "INVESTINGAPIBOT_DATABASE_URL"
+)
+
+ASYNC_DATABASE_URL = os.getenv(
+    "INVESTINGAPIBOT_ASYNC_DATABASE_URL"
+)
+
 engine = create_engine(
-    os.getenv("INVESTINGAPIBOT_DATABASE_URL", "sqlite:///InvestingAPIBot.db"),
+    DATABASE_URL,
     echo=True
 )
 
 async_engine = create_async_engine(
-    os.getenv("INVESTINGAPIBOT_DATABASE_URL", "sqlite+aiosqlite:///InvestingAPIBot.db"),
+    ASYNC_DATABASE_URL,
     echo=True
 )
 
-AsyncSessionLocal = sessionmaker(async_engine, class_=AsyncSession, expire_on_commit=False) # NoQa
+AsyncSessionLocal = sessionmaker(bind=async_engine, class_=AsyncSession, expire_on_commit=False) # NoQa
