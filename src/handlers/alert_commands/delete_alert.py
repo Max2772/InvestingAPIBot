@@ -1,4 +1,5 @@
 import re
+
 from aiogram.enums import ParseMode
 from aiogram.filters import Command
 from aiogram.types import Message
@@ -6,14 +7,14 @@ from sqlalchemy import select, and_
 from sqlalchemy.exc import SQLAlchemyError
 
 from src.dao.models import AsyncSessionLocal, User, Alert
-from src.bot_init import dp
-from src import (get_logger)
+from src.configuration.bot_init import dp
+from src.utils import get_logger
 
 
 logger = get_logger()
 
 @dp.message(Command('delete_alert'))
-async def delete_alert_handler(message: Message, user: User) -> None:
+async def delete_alert_handler(message: Message, user: User):
     pattern = re.compile(r"^/delete_alert\s+(\d+)$", re.IGNORECASE)
     match = pattern.match(message.text.strip())
     if not match:

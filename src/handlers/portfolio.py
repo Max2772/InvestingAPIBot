@@ -1,5 +1,6 @@
 import re
 from decimal import Decimal
+
 import aiohttp
 from aiogram.enums import ParseMode
 from aiogram.filters import Command
@@ -8,15 +9,15 @@ from sqlalchemy import func, select
 from sqlalchemy.exc import SQLAlchemyError
 
 from src.dao.models import AsyncSessionLocal, User, Portfolio
-from src.bot_init import dp
-from src import (get_api_url, get_logger, profit_emoji, profit_sign, fetch_api_data)
+from src.configuration.bot_init import dp
+from src.utils import get_api_url, get_logger, profit_emoji, profit_sign, fetch_api_data
 
 
 logger = get_logger()
 
 PORTFOLIO_SETTINGS = ['all', 'stocks', 'crypto', 'steam']
 
-mode_titles = {
+MODE_TITLES = {
     'all': 'Your Portfolio',
     'stock': 'Your Portfolio (Stocks)',
     'crypto': 'Your Portfolio (Crypto)',
@@ -24,7 +25,7 @@ mode_titles = {
 }
 
 @dp.message(Command('portfolio'))
-async def portfolio_handler(message: Message, user: User) -> None:
+async def portfolio_handler(message: Message, user: User):
     pattern = re.compile(r"^/portfolio\s+(all|stocks|crypto|steam)$")
     match = re.match(pattern, message.text.strip())
     if not match:
@@ -41,7 +42,7 @@ async def portfolio_handler(message: Message, user: User) -> None:
                 await message.answer("Your portfolio is empty. Add assets with /add_stock, /add_crypto, or /add_steam.")
                 return
 
-            portfolio_text = f"<b>📊 {mode_titles[mode]}</b>\n\n"
+            portfolio_text = f"<b>📊 {MODE_TITLES[mode]}</b>\n\n"
             stock_text = "<b>🏛️  Stocks</b>\n"
             crypto_text = "<b>₿  Crypto</b>\n"
             steam_text = "<b>🎮  Steam Items</b>\n"

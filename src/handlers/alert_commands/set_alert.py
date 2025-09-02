@@ -1,7 +1,8 @@
 import re
 from decimal import Decimal
-import aiohttp
 from html import escape
+import aiohttp
+
 from aiogram.enums import ParseMode
 from aiogram.filters import Command
 from aiogram.types import Message
@@ -9,9 +10,9 @@ from sqlalchemy import select, and_, func
 from sqlalchemy.exc import SQLAlchemyError
 
 from src.dao.models import AsyncSessionLocal, User, Alert
-from src.bot_init import dp
-from src.config import MAXIMUM_ALERTS
-from src import (get_logger, get_api_url, fetch_api_data)
+from src.configuration.bot_init import dp
+from src.configuration.config import MAXIMUM_ALERTS
+from src.utils import get_logger, get_api_url, fetch_api_data
 
 
 logger = get_logger()

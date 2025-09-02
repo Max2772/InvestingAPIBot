@@ -41,7 +41,7 @@ def run_migrations_offline() -> None:
     script output.
 
     """
-    url = os.getenv("INVESTINGAPIBOT_DATABASE_URL")
+    url = os.getenv("INVESTINGAPIBOT_DATABASE_URL", "sqlite:///InvestingAPIBot.db")
     context.configure(
         url=url,
         target_metadata=target_metadata,

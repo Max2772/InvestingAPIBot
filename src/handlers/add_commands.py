@@ -1,15 +1,17 @@
 import re
-import aiohttp
 from decimal import Decimal
 from urllib.parse import unquote
+
+import aiohttp
 from aiogram import html
 from aiogram.filters import Command
 from aiogram.types import Message
 from sqlalchemy import select, and_
 
 from src.dao.models import AsyncSessionLocal, User, Portfolio
-from src.bot_init import dp
-from src import (get_logger, get_api_url, fetch_api_data, science_price_pattern, float_price_pattern)
+from src.configuration.bot_init import dp
+from src.utils import get_logger, get_api_url, fetch_api_data, science_price_pattern, float_price_pattern
+
 
 logger = get_logger()
 

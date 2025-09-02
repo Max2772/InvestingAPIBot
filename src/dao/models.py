@@ -1,8 +1,10 @@
 import os
 from datetime import datetime, UTC
+
 from sqlalchemy import Column, String, Boolean, DateTime, create_engine, BigInteger, Integer, ForeignKey, Float, Numeric
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import declarative_base, sessionmaker, relationship
+
 
 Base = declarative_base()
 
@@ -56,35 +58,14 @@ class Alert(Base):
         return f"<Alert(id={self.id}, user_id={self.user_id}, name='{self.asset_name}', alert_price={self.alert_price})>"
 
 
-
-# DATABASE_URL = os.getenv(
-#     "INVESTINGAPIBOT_DATABASE_URL",
-#     "sqlite:///InvestingAPIBot.db"
-# )
-
-
-DATABASE_URL = os.getenv(
-    "INVESTINGAPIBOT_DATABASE_URL"
-)
-
-
 engine = create_engine(
-    DATABASE_URL,
+    os.getenv("INVESTINGAPIBOT_DATABASE_URL", "sqlite:///InvestingAPIBot.db"),
     echo=True
-)
-
-
-# ASYNC_DATABASE_URL = os.getenv(
-#     "INVESTINGAPIBOT_ASYNC_DATABASE_URL",
-#     "sqlite+aiosqlite:///InvestingAPIBot.db"
-# )
-
-ASYNC_DATABASE_URL = os.getenv(
-    "INVESTINGAPIBOT_ASYNC_DATABASE_URL"
 )
 
 async_engine = create_async_engine(
-    ASYNC_DATABASE_URL,
+    os.getenv("INVESTINGAPIBOT_DATABASE_URL", "sqlite+aiosqlite:///InvestingAPIBot.db"),
     echo=True
 )
-AsyncSessionLocal = sessionmaker(bind=async_engine, class_=AsyncSession, expire_on_commit=False) # NoQa
+
+AsyncSessionLocal = sessionmaker(async_engine, class_=AsyncSession, expire_on_commit=False) # NoQa
