@@ -6,7 +6,7 @@ from aiogram.enums import ParseMode
 from src.middlewares import (ThrottlingMiddleware, UserMiddleware)
 from src.configuration.config import TOKEN, REDIS_URL, ADMIN_ID
 from src.utils import get_logger
-from src.configuration import check_redis
+from src.configuration.check_redis import check_redis
 
 
 logger = get_logger()
@@ -29,3 +29,6 @@ async def on_startup():
 
         await bot.session.close()
         quit()
+    else:
+        await bot.send_message(ADMIN_ID, "✅ Redis available, bot started successfully.")
+        logger.info("Redis available, bot started successfully")

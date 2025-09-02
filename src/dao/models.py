@@ -1,11 +1,13 @@
 import os
 from datetime import datetime, UTC
 
+from dotenv import load_dotenv
 from sqlalchemy import Column, String, Boolean, DateTime, create_engine, BigInteger, Integer, ForeignKey, Float, Numeric
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import declarative_base, sessionmaker, relationship
 
 
+load_dotenv('.env.dev')
 Base = declarative_base()
 
 class User(Base):
