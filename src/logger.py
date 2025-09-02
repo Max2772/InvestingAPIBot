@@ -14,7 +14,7 @@ LOG_LEVEL_MAPPING = {
 
 _logger = None
 
-def setup_logger(log_level: str) -> logging.Logger:
+def setup_logger(log_level: str = None) -> logging.Logger:
     global _logger
     if _logger is not None:
         return _logger
