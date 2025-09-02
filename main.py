@@ -1,10 +1,10 @@
 import asyncio
 import argparse
 
-from src.tasks import (check_alerts)
 from src import handlers # NoQa
-from src.bot_init import bot, dp
-from src import (setup_logger)
+from src.tasks import check_alerts
+from src.logger import setup_logger
+from src.configuration.bot_init import bot, dp
 
 
 async def main():

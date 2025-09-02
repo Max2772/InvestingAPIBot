@@ -1,10 +1,11 @@
 import re
+
 from aiogram.filters import Command
 from aiogram.types import Message
 from sqlalchemy.exc import SQLAlchemyError
 
-from src.bot_init import dp
-from src import (get_logger)
+from src.utils import get_logger
+from src.configuration.bot_init import dp
 from src.dao.models import User
 
 
@@ -12,7 +13,7 @@ logger = get_logger()
 
 HISTORY_SETTINGS = ['all', 'stocks', 'crypto', 'steam']
 
-mode_titles = {
+MODE_TITLES = {
     'all': 'Your Portfolio History',
     'stock': 'Your Portfolio History (Stocks)',
     'crypto': 'Your Portfolio History (Crypto)',
@@ -20,7 +21,7 @@ mode_titles = {
 }
 
 @dp.message(Command('history'))
-async def history_handler(message: Message, user: User) -> None:
+async def history_handler(message: Message, user: User):
     pattern = re.compile(r"^/history\s+(all|stocks|crypto|steam)$")
     match = pattern.match(message.text.strip())
     if not match:

@@ -2,7 +2,7 @@ from aiogram.enums import ParseMode
 from aiogram.filters import Command
 from aiogram.types import Message
 
-from src.bot_init import dp
+from src.configuration.bot_init import dp
 
 
 @dp.message(Command('help'))

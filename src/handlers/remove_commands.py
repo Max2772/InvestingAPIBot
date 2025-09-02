@@ -1,6 +1,7 @@
 import re
 from decimal import Decimal
 from urllib.parse import unquote
+
 import aiohttp
 from aiogram.filters import Command
 from aiogram.types import Message
@@ -8,8 +9,8 @@ from sqlalchemy import select, and_
 from sqlalchemy.exc import SQLAlchemyError
 
 from src.dao.models import AsyncSessionLocal, User, Portfolio
-from src.bot_init import dp
-from src import (get_api_url, get_logger, fetch_api_data)
+from src.configuration.bot_init import dp
+from src.utils import get_api_url, get_logger, fetch_api_data
 
 
 logger = get_logger()

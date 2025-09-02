@@ -14,7 +14,7 @@ LOG_LEVEL_MAPPING = {
 
 _logger = None
 
-def setup_logger(log_level = logging.INFO):
+def setup_logger(log_level = logging.INFO) -> logging.Logger:
     global _logger
     if _logger is not None:
         return _logger
@@ -48,7 +48,7 @@ def setup_logger(log_level = logging.INFO):
     _logger.info('Loger initialized')
     return _logger
 
-def get_logger():
+def get_logger() -> logging.Logger:
     global _logger
     if _logger is None:
         temp_logger = logging.getLogger(__name__)

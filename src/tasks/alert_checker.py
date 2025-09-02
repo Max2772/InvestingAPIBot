@@ -2,15 +2,16 @@ import asyncio
 import operator
 from decimal import Decimal
 from html import escape
+
 import aiohttp
 from aiogram.enums import ParseMode
 from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
 
 from src.dao.models import AsyncSessionLocal, Alert
-from src.bot_init import bot
-from src.config import ALERT_INTERVAL_SECONDS
-from src import (get_logger, get_api_url)
+from src.configuration.bot_init import bot
+from src.configuration.config import ALERT_INTERVAL_SECONDS
+from src.utils import get_logger, get_api_url
 
 
 logger = get_logger()

@@ -3,7 +3,7 @@ from aiogram.types import Message
 from aiogram import html
 
 from src.dao.models import AsyncSessionLocal, User
-from src.bot_init import dp
+from src.configuration.bot_init import dp
 
 
 @dp.message(Command('start', 'register'))

@@ -1,8 +1,10 @@
 import os
 from datetime import datetime, UTC
+
 from sqlalchemy import Column, String, Boolean, DateTime, create_engine, BigInteger, Integer, ForeignKey, Float, Numeric
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import declarative_base, sessionmaker, relationship
+
 
 Base = declarative_base()
 
@@ -54,6 +56,7 @@ class Alert(Base):
 
     def __repr__(self):
         return f"<Alert(id={self.id}, user_id={self.user_id}, name='{self.asset_name}', alert_price={self.alert_price})>"
+
 
 engine = create_engine(
     os.getenv("INVESTINGAPIBOT_DATABASE_URL", "sqlite:///InvestingAPIBot.db"),
