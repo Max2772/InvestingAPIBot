@@ -20,8 +20,8 @@ if __name__ == '__main__':
 
     if args.log_level:
         log_level = args.log_level.upper()
-        _logger = setup_logger(log_level)
+        logger = setup_logger(log_level)
     else:
-        _logger = setup_logger()
+        logger = setup_logger()
 
     asyncio.run(main())
