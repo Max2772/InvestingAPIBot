@@ -1,8 +1,0 @@
-pip-tools
-aiogram
-aiohttp
-redis
-dotenv
-sqlalchemy
-alembic
-aiosqlite
