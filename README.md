@@ -43,7 +43,7 @@ The bot is live and publicly available at [@InvestingAPIBot](https://t.me/Invest
    # or
    pip install -r requirements/prod/requirements.txt  # For production
    ```
-3. Set up environment variables (see [Configuration](#configuration-)).
+3. Set up environment variables (see [Configuration](#configuration)).
 
 
 4. For production, deploy the PostgreSQL database (and optional Redis):
@@ -78,7 +78,7 @@ To run the bot as a service on a Linux server (e.g., Ubuntu):
    ```
    **Note**: Adjust `User`, `WorkingDirectory`, and `ExecStart` paths to match your server setup. The `.service` file is not included in the repository, so copy it from this README.
 
-2. Create `/etc/investingapibot.conf` (see [Configuration](#configuration-)).
+2. Create `/etc/investingapibot.conf` (see [Configuration](#configuration)).
 
 3. Enable and start the service:
    ```bash
@@ -86,7 +86,7 @@ To run the bot as a service on a Linux server (e.g., Ubuntu):
    sudo systemctl start investingapibot
    ```
 
-## Configuration ⚙️
+<h2 id="configuration">Configuration ⚙️</h2>
 
 Create environment files in the project root for local development (`.env` and `.env.dev`) or `/etc/investingapibot.conf` for production. The bot can reuse the Redis container from InvestAPI (on `redis://127.0.0.1:6379`), but for standalone deployment, consider adding a Redis service to `docker-compose.yaml`.
 
