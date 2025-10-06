@@ -11,7 +11,7 @@ Telegram bot for tracking your investments in stocks, crypto, and Steam items us
 
 ## Description
 
-@InvestingAPIBot is a Telegram bot built with `aiogram` that allows you to manage and track your investment portfolio 📊 in real-time. It integrates with [InvestAPI](https://github.com/Max2772/InvestAPI) to fetch prices for stocks, ETFs, cryptocurrencies, and Steam items. The bot consolidates data from multiple asset types into one convenient interface, eliminating the need to check prices across multiple apps or websites.
+[@InvestingAPIBot](https://t.me/InvestingAPIBot) is a Telegram bot built with `aiogram` that allows you to manage and track your investment portfolio 📊 in real-time. It integrates with [InvestAPI](https://github.com/Max2772/InvestAPI) to fetch prices for stocks, ETFs, cryptocurrencies, and Steam items. The bot consolidates data from multiple asset types into one convenient interface, eliminating the need to check prices across multiple apps or websites.
 
 **Key Features:**
 - 📈 Track stocks, cryptocurrencies, and Steam items in a single portfolio.
@@ -44,6 +44,8 @@ The bot is live and publicly available at [@InvestingAPIBot](https://t.me/Invest
    pip install -r requirements/prod/requirements.txt  # For production
    ```
 3. Set up environment variables (see [Configuration](#configuration-)).
+
+
 4. For production, deploy the PostgreSQL database (and optional Redis):
    ```bash
    cd docker
@@ -57,6 +59,7 @@ The bot is live and publicly available at [@InvestingAPIBot](https://t.me/Invest
 ### Running as a Systemd Service (Production)
 To run the bot as a service on a Linux server (e.g., Ubuntu):
 1. Create `/etc/systemd/system/investingapibot.service` with the following content:
+
    ```ini
    [Unit]
    Description=Telegram Bot for InvestAPI
@@ -74,7 +77,9 @@ To run the bot as a service on a Linux server (e.g., Ubuntu):
    WantedBy=multi-user.target
    ```
    **Note**: Adjust `User`, `WorkingDirectory`, and `ExecStart` paths to match your server setup. The `.service` file is not included in the repository, so copy it from this README.
+
 2. Create `/etc/investingapibot.conf` (see [Configuration](#configuration-)).
+
 3. Enable and start the service:
    ```bash
    sudo systemctl enable investingapibot
