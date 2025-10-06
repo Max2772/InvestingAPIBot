@@ -8,7 +8,7 @@ from src.configuration.bot_init import bot, dp
 
 
 async def main():
-    # asyncio.create_task(check_alerts())
+    asyncio.create_task(check_alerts())
     await dp.start_polling(bot)
 
 if __name__ == '__main__':
