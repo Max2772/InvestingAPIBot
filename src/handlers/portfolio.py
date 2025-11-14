@@ -85,7 +85,8 @@ async def portfolio_handler(message: Message, user: User):
                         total_current_value += current_price * quantity
                         growth = ((current_price - buy_price) / buy_price) * 100 if buy_price != 0 else Decimal('0')
 
-                        asset_text = (f"<b>{asset_name}</b>: {portfolio.quantity:.2f} at avg. price ${buy_price:.2f},"
+                        asset_quantity = portfolio.quantity.quantize(Decimal('0.01')) if portfolio.asset_type != "crypto" else portfolio.quantity.normalize()
+                        asset_text = (f"<b>{asset_name}</b>: {asset_quantity} at avg. price ${buy_price:.2f},"
                                       f" now ${current_price:.2f}, value ${buy_price * portfolio.quantity:.2f}"
                                       f" ({profit_sign(growth)}{growth:.2f}%{profit_emoji(growth)})\n")
 

@@ -82,7 +82,7 @@ async def add_stock_handler(message: Message, user: User):
 
 @dp.message(Command('add_crypto'))
 async def add_crypto_handler(message: Message, user: User):
-    pattern = re.compile(rf"^/add_crypto\s+([A-Za-z0-9. ]+)\s+({science_price_pattern})\s*(?:-p\s+({science_price_pattern}))?$")
+    pattern = re.compile(rf"^/add_crypto\s+([-A-Za-z0-9. ]+)\s+({science_price_pattern})\s*(?:-p\s+({science_price_pattern}))?$")
     match = pattern.match(message.text.strip())
     if not match:
         await message.answer("Please provide a valid coin and amount!")
