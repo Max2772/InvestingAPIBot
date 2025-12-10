@@ -1,7 +1,7 @@
 import asyncio
 import argparse
 
-from src import handlers # NoQa
+from src.handlers import * # NoQa
 from src.tasks import check_alerts
 from src.logger import setup_logger
 from src.configuration.bot_init import bot, dp

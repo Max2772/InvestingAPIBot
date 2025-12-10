@@ -1,11 +1,11 @@
+from aiogram import Router
 from aiogram.enums import ParseMode
 from aiogram.filters import Command
 from aiogram.types import Message
 
-from src.configuration.bot_init import dp
+router = Router()
 
-
-@dp.message(Command('help'))
+@router.message(Command('help'))
 async def help_handler(message: Message):
     help_text = (
     "<b>📚 Bot Commands</b>\n\n"

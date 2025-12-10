@@ -1,15 +1,16 @@
 import re
 
+from aiogram import Router
 from aiogram.filters import Command
 from aiogram.types import Message
 from sqlalchemy.exc import SQLAlchemyError
 
-from src.utils import get_logger
-from src.configuration.bot_init import dp
 from src.dao.models import User
-
+from src.utils import get_logger
 
 logger = get_logger()
+
+router = Router()
 
 HISTORY_SETTINGS = ['all', 'stocks', 'crypto', 'steam']
 
@@ -20,7 +21,7 @@ MODE_TITLES = {
     'steam': 'Your Portfolio History (Steam)',
 }
 
-@dp.message(Command('history'))
+@router.message(Command('history'))
 async def history_handler(message: Message, user: User):
     pattern = re.compile(r"^/history\s+(all|stocks|crypto|steam)$")
     match = pattern.match(message.text.strip())

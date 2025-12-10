@@ -2,6 +2,7 @@ import re
 from decimal import Decimal
 
 import aiohttp
+from aiogram import Router, F
 from aiogram.enums import ParseMode
 from aiogram.filters import Command
 from aiogram.types import Message
@@ -9,32 +10,33 @@ from sqlalchemy import func, select
 from sqlalchemy.exc import SQLAlchemyError
 
 from src.dao.models import AsyncSessionLocal, User, Portfolio
-from src.configuration.bot_init import dp
 from src.utils import get_api_url, get_logger, profit_emoji, profit_sign, fetch_api_data
+from src.keyboards.reply_keyboards import PORTFOLIO_BUTTONS
 
 
 logger = get_logger()
 
-PORTFOLIO_SETTINGS = ['all', 'stocks', 'crypto', 'steam']
+router = Router()
 
 MODE_TITLES = {
     'all': 'Your Portfolio',
-    'stock': 'Your Portfolio (Stocks)',
+    'stocks': 'Your Portfolio (Stocks)',
     'crypto': 'Your Portfolio (Crypto)',
     'steam': 'Your Portfolio (Steam)',
 }
-
-@dp.message(Command('portfolio'))
+@router.message(Command('portfolio'))
+@router.message(F.text.in_(PORTFOLIO_BUTTONS.keys()))
 async def portfolio_handler(message: Message, user: User):
-    pattern = re.compile(r"^/portfolio\s+(all|stocks|crypto|steam)$")
-    match = re.match(pattern, message.text.strip())
-    if not match:
-        await message.answer("Please provide a parameter, e.g., /portfolio all")
-        return
+    if not message.text.strip().startswith('/portfolio'):
+        mode = PORTFOLIO_BUTTONS[message.text]
+    else:
+        pattern = re.compile(r"^/portfolio\s+(all|stocks|crypto|steam)$")
+        match = re.match(pattern, message.text.strip())
+        if not match:
+            await message.answer("Please provide a parameter, e.g., /portfolio all")
+            return
 
-    mode = match.group(1) if match and match.group(1) in PORTFOLIO_SETTINGS else 'all'
-    if mode == 'stocks':
-        mode = 'stock'
+        mode = match.group(1) if match and match.group(1) in MODE_TITLES.keys() else 'all'
 
     async with AsyncSessionLocal() as session:
         try:
@@ -43,9 +45,9 @@ async def portfolio_handler(message: Message, user: User):
                 return
 
             portfolio_text = f"<b>📊 {MODE_TITLES[mode]}</b>\n\n"
-            stock_text = "<b>🏛️  Stocks</b>\n"
-            crypto_text = "<b>₿  Crypto</b>\n"
-            steam_text = "<b>🎮  Steam Items</b>\n"
+            stock_text = "<b>💹  Stocks</b>\n"
+            crypto_text = "<b>⚡  Crypto</b>\n"
+            steam_text = "<b>🕹️  Steam Items</b>\n"
 
             total_old_value = Decimal('0')
             total_current_value = Decimal('0')
@@ -90,7 +92,7 @@ async def portfolio_handler(message: Message, user: User):
                                       f" now ${current_price:.2f}, value ${buy_price * portfolio.quantity:.2f}"
                                       f" ({profit_sign(growth)}{growth:.2f}%{profit_emoji(growth)})\n")
 
-                        if asset_type == 'stock':
+                        if asset_type == 'stocks':
                             stock_text += asset_text
                         elif asset_type == 'crypto':
                             crypto_text += asset_text
@@ -103,7 +105,7 @@ async def portfolio_handler(message: Message, user: User):
                     step += 1
             await loading_message.delete()
 
-            if mode == 'stock':
+            if mode == 'stocks':
                 portfolio_text += stock_text + '\n'
             elif mode == 'crypto':
                 portfolio_text += crypto_text + '\n'

@@ -3,7 +3,8 @@ from aiogram.fsm.storage.redis import RedisStorage
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 
-from src.middlewares import (ThrottlingMiddleware, UserMiddleware)
+from src.handlers import *
+from src.middlewares import ThrottlingMiddleware, UserMiddleware
 from src.configuration.config import TOKEN, REDIS_URL, ADMIN_ID
 from src.utils import get_logger
 from src.configuration.check_redis import check_redis
@@ -16,6 +17,28 @@ storage = RedisStorage.from_url(REDIS_URL)
 dp = Dispatcher(storage=storage)
 dp.message.middleware.register(ThrottlingMiddleware(storage=storage))
 dp.message.middleware.register(UserMiddleware())
+
+dp.include_router(register_router)
+dp.include_router(help_router)
+
+dp.include_router(check_stock_router)
+dp.include_router(check_crypto_router)
+dp.include_router(check_steam_router)
+
+dp.include_router(add_stock_router)
+dp.include_router(add_crypto_router)
+dp.include_router(add_steam_router)
+
+dp.include_router(remove_stock_router)
+dp.include_router(remove_crypto_router)
+dp.include_router(remove_steam_router)
+
+dp.include_router(alerts_router)
+dp.include_router(set_alert_router)
+dp.include_router(delete_alert_router)
+
+dp.include_router(portfolio_router)
+dp.include_router(history_router)
 
 
 @dp.startup()

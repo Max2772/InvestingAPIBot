@@ -1,19 +1,19 @@
-from src.handlers.start import register_handler
-from src.handlers.help import help_handler
-from src.handlers.check_commands import check_stock_handler, check_crypto_handler, check_steam_handler
-from src.handlers.add_commands import add_stock_handler, add_crypto_handler, add_steam_handler
-from src.handlers.remove_commands import remove_stock_handler, remove_crypto_handler, remove_steam_handler
-from src.handlers.alert_commands import (alerts_handler, set_alert_handler, delete_alert_handler)
-from src.handlers.portfolio import portfolio_handler
-from src.handlers.history import history_handler
+from src.handlers.start import router as register_router
+from src.handlers.help import router as help_router
+from src.handlers.check_commands import check_stock_router, check_crypto_router, check_steam_router
+from src.handlers.add_commands import add_stock_router, add_crypto_router, add_steam_router
+from src.handlers.remove_commands import remove_stock_router, remove_crypto_router, remove_steam_router
+from src.handlers.alert_commands import alerts_router, set_alert_router, delete_alert_router
+from src.handlers.portfolio import router as portfolio_router
+from src.handlers.history import router as history_router
 
 __all__ = [
-    "register_handler",
-    "help_handler",
-    "check_stock_handler", "check_crypto_handler", "check_steam_handler",
-    "add_stock_handler", "add_crypto_handler", "add_steam_handler",
-    "remove_stock_handler", "remove_crypto_handler", "remove_steam_handler",
-    "alerts_handler", "set_alert_handler", "delete_alert_handler",
-    "portfolio_handler",
-    "history_handler"
+    "register_router",
+    "help_router",
+    "check_stock_router", "check_crypto_router", "check_steam_router",
+    "add_stock_router", "add_crypto_router", "add_steam_router",
+    "remove_stock_router", "remove_crypto_router", "remove_steam_router",
+    "alerts_router", "set_alert_router", "delete_alert_router",
+    "portfolio_router",
+    "history_router"
 ]

@@ -1,23 +1,25 @@
 import re
 from decimal import Decimal
 from html import escape
-import aiohttp
 
+import aiohttp
+from aiogram import Router
 from aiogram.enums import ParseMode
 from aiogram.filters import Command
 from aiogram.types import Message
 from sqlalchemy import select, and_, func
 from sqlalchemy.exc import SQLAlchemyError
 
-from src.dao.models import AsyncSessionLocal, User, Alert
-from src.configuration.bot_init import dp
 from src.configuration.config import MAXIMUM_ALERTS
+from src.dao.models import AsyncSessionLocal, User, Alert
 from src.utils import get_logger, get_api_url, fetch_api_data
-
 
 logger = get_logger()
 
-@dp.message(Command('set_alert'))
+router = Router()
+
+
+@router.message(Command('set_alert'))
 async def set_alert_handler(message: Message, user: User):
     pattern = re.compile(r"^/set_alert\s+(stock|crypto|steam)(\s+\d+)?\s+(.+)\s+(>|>=|<|<=)\s+(\d+(\.\d+)?)$", re.IGNORECASE)
     match = pattern.match(message.text.strip())

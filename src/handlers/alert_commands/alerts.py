@@ -1,18 +1,20 @@
 from html import escape
 
+from aiogram import Router
 from aiogram.enums import ParseMode
 from aiogram.filters import Command
 from aiogram.types import Message
 from sqlalchemy.exc import SQLAlchemyError
 
 from src.dao.models import AsyncSessionLocal, User
-from src.configuration.bot_init import dp
 from src.utils import get_logger
-
 
 logger = get_logger()
 
-@dp.message(Command('alerts'))
+router = Router()
+
+
+@router.message(Command('alerts'))
 async def alerts_handler(message: Message, user: User):
     async with AsyncSessionLocal() as session:
         try:

@@ -4,7 +4,19 @@ from aiogram import BaseMiddleware
 from aiogram.types import Message
 
 from src.dao.models import AsyncSessionLocal, User
+from src.utils import get_logger
 
+
+logger = get_logger()
+
+HANDLERS_WITHOUT_REGISTRATION = [
+    '/start',
+    '/register',
+    '/help',
+    'check_stock',
+    'check_crypto',
+    'check_steam'
+]
 
 class UserMiddleware(BaseMiddleware):
     async def __call__(
@@ -13,7 +25,8 @@ class UserMiddleware(BaseMiddleware):
             event: Message,
             data: Dict[str, Any],
     ) -> Any:
-        if event.text.strip().lower() in ('/start', '/register'):
+
+        if event.text.strip().lower() in HANDLERS_WITHOUT_REGISTRATION:
             return await handler(event, data)
 
         async with AsyncSessionLocal() as session:

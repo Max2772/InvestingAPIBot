@@ -1,12 +1,13 @@
+from aiogram import Router, html
 from aiogram.filters import Command
 from aiogram.types import Message
-from aiogram import html
 
+import src.keyboards.reply_keyboards as rkb
 from src.dao.models import AsyncSessionLocal, User
-from src.configuration.bot_init import dp
 
+router = Router()
 
-@dp.message(Command('start', 'register'))
+@router.message(Command('start', 'register'))
 async def register_handler(message: Message):
     async with AsyncSessionLocal() as session:
         user = await session.get(User, message.from_user.id)
@@ -20,6 +21,6 @@ async def register_handler(message: Message):
 
             session.add(user)
             await session.commit()
-            await message.answer(f"Welcome, you are registered, {html.bold(message.from_user.full_name)}!")
+            await message.answer(f"Welcome, you are registered, {html.bold(message.from_user.full_name)}!", reply_markup=rkb.main)
         else:
-            await message.answer(f"Hello again, {html.bold(user.first_name)}!")
+            await message.answer(f"Hello again, {html.bold(user.first_name)}!", reply_markup=rkb.main)
