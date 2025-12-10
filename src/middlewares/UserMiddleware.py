@@ -12,10 +12,7 @@ logger = get_logger()
 HANDLERS_WITHOUT_REGISTRATION = [
     '/start',
     '/register',
-    '/help',
-    'check_stock',
-    'check_crypto',
-    'check_steam'
+    '/help'
 ]
 
 class UserMiddleware(BaseMiddleware):
@@ -28,6 +25,7 @@ class UserMiddleware(BaseMiddleware):
 
         if event.text.strip().lower() in HANDLERS_WITHOUT_REGISTRATION:
             return await handler(event, data)
+
 
         async with AsyncSessionLocal() as session:
             user = await session.get(User, event.from_user.id)
