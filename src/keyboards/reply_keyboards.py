@@ -2,7 +2,7 @@ from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 
 PORTFOLIO_BUTTONS = {
     'All  🌐': 'all',
-    'Stocks 💹': 'stocks',
+    'Stocks 💹': 'stock',
     'Crypto ⚡': 'crypto',
     'Steam  🕹️': 'steam'
 }

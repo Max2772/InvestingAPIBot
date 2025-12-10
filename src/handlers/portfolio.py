@@ -20,7 +20,7 @@ router = Router()
 
 MODE_TITLES = {
     'all': 'Your Portfolio',
-    'stocks': 'Your Portfolio (Stocks)',
+    'stock': 'Your Portfolio (Stocks)',
     'crypto': 'Your Portfolio (Crypto)',
     'steam': 'Your Portfolio (Steam)',
 }
@@ -37,6 +37,9 @@ async def portfolio_handler(message: Message, user: User):
             return
 
         mode = match.group(1) if match and match.group(1) in MODE_TITLES.keys() else 'all'
+
+    if mode == 'stocks':
+        mode = 'stock'
 
     async with AsyncSessionLocal() as session:
         try:
@@ -92,7 +95,7 @@ async def portfolio_handler(message: Message, user: User):
                                       f" now ${current_price:.2f}, value ${buy_price * portfolio.quantity:.2f}"
                                       f" ({profit_sign(growth)}{growth:.2f}%{profit_emoji(growth)})\n")
 
-                        if asset_type == 'stocks':
+                        if asset_type == 'stock':
                             stock_text += asset_text
                         elif asset_type == 'crypto':
                             crypto_text += asset_text
