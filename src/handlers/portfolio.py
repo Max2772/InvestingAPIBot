@@ -108,7 +108,7 @@ async def portfolio_handler(message: Message, user: User):
                     step += 1
             await loading_message.delete()
 
-            if mode == 'stocks':
+            if mode == 'stock':
                 portfolio_text += stock_text + '\n'
             elif mode == 'crypto':
                 portfolio_text += crypto_text + '\n'
