@@ -138,19 +138,23 @@ For production, use the following `docker-compose.yaml` to set up PostgreSQL and
 ```yaml
 services:
   database:
-    image: postgres:17
+    image: postgres:17-alpine
     container_name: investingapibot_database
     volumes:
-      - /var/lib/postgresql/data:/var/lib/postgresql/data
+      - investingapibot_db_data:/var/lib/postgresql/data
     env_file:
       - database.env
     ports:
       - "127.0.0.1:5432:5432"
+    
   redis:
     image: redis
     container_name: investingapibot_redis
     ports:
       - "127.0.0.1:6379:6379"
+
+volumes:
+  investingapibot_db_data:
 ```
 **Note**: If running InvestAPI on the same machine, you can reuse its Redis container (`redis://127.0.0.1:6379`) instead of adding a separate one.
 
