@@ -1,5 +1,4 @@
 from decimal import Decimal
-from urllib.parse import unquote
 
 from aiogram import Router
 from aiogram.filters import Command
@@ -11,6 +10,7 @@ from src.types.response_enums import AssetType
 from src.types.system_types import LocalUser
 from src.utils.api_utils import get_latest_price
 from src.utils.db_utils import upsert_asset
+from src.utils.formatters import get_asset_name
 from src.utils.tg_utils import validate_amount_and_price
 
 ADD_ASSET_CMD_ROUTER = Router()
@@ -25,11 +25,8 @@ async def add_cmd_handler(message: Message, user: LocalUser):
 
     asset_type: AssetType = AssetType(match.group(1).lower())
     app_id = int(match.group(2)) if match.group(2) else None
-    asset_name = (
-        unquote(match.group(3))
-        if asset_type == AssetType.STEAM
-        else match.group(3).upper()
-    )
+    asset_name = get_asset_name(match.group(3), asset_type)
+
     amount = Decimal(match.group(4))
     parameter_price = Decimal(match.group(5)) if match.group(5) else None
 

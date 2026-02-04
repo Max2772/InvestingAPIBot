@@ -7,5 +7,5 @@ check_asset_re = re.compile(
     rf"^/check\s+"
     rf"(stock|crypto|steam)\s+"
     rf"(?:({re_int.pattern})\s+)?"
-    rf"({base_name_re.pattern})$"
+    rf"({base_name_re.pattern})\s*$"
 )

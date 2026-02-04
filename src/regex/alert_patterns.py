@@ -14,6 +14,6 @@ set_alert_re = re.compile(
 )
 
 delete_alert_re = re.compile(
-    rf"^/delete_alert\s+({re_int.pattern})$",
+    rf"^/delete_alert\s+({re_int.pattern})\s*$",
     re.IGNORECASE
 )

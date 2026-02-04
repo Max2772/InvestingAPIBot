@@ -1,6 +1,5 @@
 from decimal import Decimal
 from html import escape
-from urllib.parse import unquote
 
 from aiogram import Router
 from aiogram.filters import Command
@@ -13,6 +12,7 @@ from src.regex.alert_patterns import delete_alert_re, set_alert_re
 from src.types.response_enums import AssetType, AlertAddResult
 from src.types.system_types import LocalUser
 from src.utils.db_utils import delete_alert, add_alert, get_user, no_active_alerts
+from src.utils.formatters import get_asset_name
 
 ALERTS_CMD_ROUTER = Router()
 
@@ -83,7 +83,7 @@ async def set_alert_cmd_handler(message: Message, user: LocalUser):
 
     asset_type: AssetType = AssetType(match.group(1).lower())
     app_id = int(match.group(2)) if match.group(2) else None
-    asset_name = unquote(match.group(3)) if asset_type.STEAM else match.group(3).upper()
+    asset_name = get_asset_name(match.group(3), asset_type)
     direction = match.group(4)
     price = Decimal(match.group(5))
 

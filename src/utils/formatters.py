@@ -1,9 +1,19 @@
 from decimal import Decimal
 from html import escape
+from urllib.parse import unquote
 
 from src.dao.models import Portfolio
 from src.types.response_enums import AssetType
 
+def get_asset_name(
+        raw_name: str,
+        asset_type: AssetType
+) -> str:
+    return (
+        unquote(raw_name)
+        if asset_type == AssetType.STEAM
+        else raw_name.upper()
+)
 
 def format_growth(value: Decimal) -> str:
     sign = "+" if value > 0 else ""
@@ -50,7 +60,7 @@ def portfolio_asset_format(
     growth = ((current_price - buy_price) / buy_price) * 100 if buy_price else Decimal("0")
 
     quantity_formatted = (
-        quantity.normalize()
+        quantity.quantize(Decimal("0.0000001"))
         if portfolio.asset_type == AssetType.CRYPTO
         else quantity.quantize(Decimal("0.01"))
     )

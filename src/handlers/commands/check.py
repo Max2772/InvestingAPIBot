@@ -1,5 +1,4 @@
 from decimal import Decimal
-from urllib.parse import unquote
 
 from aiogram import Router
 from aiogram.filters import Command
@@ -9,6 +8,7 @@ from src.logger import logger
 from src.regex.check_patterns import check_asset_re
 from src.types.response_enums import AssetType
 from src.utils.api_utils import get_latest_price
+from src.utils.formatters import get_asset_name
 
 CHECK_ASSET_CMD_ROUTER = Router()
 
@@ -21,11 +21,7 @@ async def check_cmd_handler(message: Message):
 
     asset_type: AssetType = AssetType(match.group(1).lower())
     app_id = int(match.group(2)) if match.group(2) else None
-    asset_name = (
-        unquote(match.group(3))
-        if asset_type == AssetType.STEAM
-        else match.group(3).upper()
-    )
+    asset_name = get_asset_name(match.group(3), asset_type)
 
     try:
         price: Decimal = await get_latest_price(

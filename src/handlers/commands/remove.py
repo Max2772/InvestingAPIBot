@@ -1,5 +1,4 @@
 from decimal import Decimal
-from urllib.parse import unquote
 
 from aiogram import Router
 from aiogram.filters import Command
@@ -10,6 +9,7 @@ from src.logger import logger
 from src.regex.remove_patterns import remove_asset_re
 from src.types.response_enums import RemoveAssetResult, AssetType
 from src.utils.db_utils import remove_asset
+from src.utils.formatters import get_asset_name
 
 REMOVE_ASSET_CMD_ROUTER = Router()
 
@@ -22,11 +22,7 @@ async def remove_cmd_handler(message: Message, user: DbUser):
 
     asset_type: AssetType = AssetType(match.group(1).lower())
     app_id = int(match.group(2)) if match.group(2) else None
-    asset_name = (
-        unquote(match.group(3))
-        if asset_type == asset_type.STEAM
-        else match.group(3).upper()
-    )
+    asset_name = get_asset_name(match.group(3), asset_type)
     amount = Decimal(match.group(4)) if match.group(4) is not None else None
 
     if amount and amount <= 0:
