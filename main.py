@@ -1,27 +1,19 @@
 import asyncio
-import argparse
 
-from src.handlers import * # NoQa
+from src.bot_init.bot_init import bot, dp
+from src.logger import logger
 from src.tasks import check_alerts
-from src.logger import setup_logger
-from src.configuration.bot_init import bot, dp
 
 
 async def main():
-    asyncio.create_task(check_alerts())
-    await dp.start_polling(bot)
+    alert_task = asyncio.create_task(check_alerts())
+    bot_task = asyncio.create_task(dp.start_polling(bot))
+
+    await asyncio.gather(
+        alert_task,
+        bot_task
+    )
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--log-level', type=str, default=None,
-                        help="Logging Level (DEBUG, INFO, WARNING, ERROR, CRITICAL)")
-
-    args = parser.parse_args()
-
-    if args.log_level:
-        log_level = args.log_level.upper()
-        logger = setup_logger(log_level)
-    else:
-        logger = setup_logger()
-
+    logger.info("Staring InvestingAPI Bot...")
     asyncio.run(main())

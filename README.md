@@ -197,7 +197,7 @@ Interact with the bot via Telegram at [@InvestingAPIBot](https://t.me/InvestingA
 - `/remove_steam <app_id> <market_name> <quantity>`: Remove Steam item from portfolio.
 -   - Example: `/remove_steam 730 Glove Case 10`
     - Response: `Removed 10 Glove Case from portfolio`
-- `/portfolio <all|stocks|crypto|steam|total>`: View your portfolio.
+- `/portfolio <all|stock|crypto|steam|total>`: View your portfolio.
   - Example: `/portfolio all`
   - Response:
     ```
@@ -236,7 +236,7 @@ Interact with the bot via Telegram at [@InvestingAPIBot](https://t.me/InvestingA
 - `/delete_alert <id>`: Remove an alert by ID.
   - Example: `/delete_alert 1`
   - Response: `🔔 Alert #1 for AMD deleted successfully`
-- `/history <all|stocks|crypto|steam>`: View purchase history.
+- `/history <all|stock|crypto|steam>`: View purchase history.
   - Example: `/history stocks`
   - Response:
     ```

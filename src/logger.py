@@ -1,56 +1,35 @@
 import logging
-from logging.handlers import RotatingFileHandler
+
+from src.env import LOG_LEVEL
 
 
-LOG_LEVEL_MAPPING = {
-    'DEBUG': logging.DEBUG,
-    'INFO': logging.INFO,
-    'WARNING': logging.WARNING,
-    'WARN': logging.WARNING,
-    'ERROR': logging.ERROR,
-    'FATAL': logging.CRITICAL,
-    'CRITICAL': logging.CRITICAL,
-}
+class LevelFormatter(logging.Formatter):
+    def __init__(self, fmt_default, fmt_warn, datefmt=None):
+        super().__init__(fmt=fmt_default, datefmt=datefmt)
+        self.fmt_default = fmt_default
+        self.fmt_warn = fmt_warn
 
-_logger = None
+    def format(self, record):
+        if record.levelno >= logging.WARNING:
+            self._style._fmt = self.fmt_warn
+        else:
+            self._style._fmt = self.fmt_default
+        return super().format(record)
 
-def setup_logger(log_level: str = None) -> logging.Logger:
-    global _logger
-    if _logger is not None:
-        return _logger
+logger = logging.getLogger(__name__)
 
-    log_level = LOG_LEVEL_MAPPING.get(log_level, logging.INFO)
+fmt_console = "%(asctime)s - %(levelname)s - %(message)s"
+fmt_warning = "%(asctime)s - %(levelname)s - [%(funcName)s] %(message)s"
 
-    _logger = logging.getLogger()
-    _logger.setLevel(log_level)
+formatter = LevelFormatter(fmt_default=fmt_console, fmt_warn=fmt_warning, datefmt="%d.%m.%y %H:%M")
 
-    console_handler = logging.StreamHandler()
-    console_handler.setLevel(log_level)
-    if log_level == logging.INFO:
-        console_handler.setFormatter(logging.Formatter('%(asctime)s - [%(processName)-11s] %(levelname)s - %(message)s'))
-    else:
-        console_handler.setFormatter(
-            logging.Formatter('%(asctime)s - [%(processName)-11s] %(levelname)s - '
-                              '%(module)s.%(funcName)s:%(lineno)d - %(message)s'))
-    _logger.addHandler(console_handler)
+logger_level = getattr(logging, LOG_LEVEL, logging.INFO)
 
-    file_handler = RotatingFileHandler(
-        'logs.log', maxBytes=2*1024*1024, backupCount=3, encoding='utf-8', errors='replace'
-    )
-    file_handler.setLevel(log_level)
-    if log_level == logging.INFO:
-        file_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - [%(processName)-11s] %(message)s'))
-    else:
-        file_handler.setFormatter(logging.Formatter('%(asctime)s - [%(processName)-11s] %(levelname)s - '
-                                                    '%(module)s.%(funcName)s:%(lineno)d - %(message)s'))
-    _logger.addHandler(file_handler)
+root = logging.getLogger()
+root.setLevel(logger_level)
 
-    _logger.info('Loger initialized')
-    return _logger
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logger_level)
+console_handler.setFormatter(formatter)
 
-def get_logger() -> logging.Logger:
-    global _logger
-    if _logger is None:
-        temp_logger = logging.getLogger(__name__)
-        return temp_logger
-    return _logger
+root.addHandler(console_handler)
