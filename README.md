@@ -12,9 +12,9 @@
 
 **Key Features:**
 - 📈 Track stocks, crypto, and Steam items in a single portfolio.
-- 🔔 Set price alerts (up to 10 per user).
+- 🔔 Set price alerts.
 - 📜 View full purchase/removal history.
-- 💻 Reliable cached prices from InvestAPI.
+- 💻 Reliable cached prices from [InvestAPI](https://github.com/Max2772/InvestAPI).
 - 🚀 Docker-based production setup with PostgreSQL.
 
 The bot is live and public: [@InvestingAPIBot](https://t.me/InvestingAPIBot).  
@@ -59,7 +59,7 @@ Development uses SQLite; production uses PostgreSQL (via Docker).
    ```
 
 ### Production (Docker)
-1. Make sure InvestAPI is running and accessible via `API_BASE_URL`.
+1. Make sure [InvestAPI](https://github.com/Max2772/InvestAPI) is running and accessible via `API_BASE_URL`.
 
 2. Create `.env` in the project root (update `DATABASE_URL` for PostgreSQL):
    ```env
@@ -241,13 +241,13 @@ All commands now use a unified format with `asset_type` (`stock`, `crypto`, or `
   Example: `/delete_alert 6`
 
 
-When an alert triggers, you'll get a notification like:
-```
-🔔 Alert Triggered!
-Asset: AMD
-Current price: $202.05
-Target: > $200.00
-```
+- When an alert triggers, you'll get a notification like:
+  ```
+  🔔 Alert Triggered!
+  Asset: AMD
+  Current price: $202.05
+  Target: > $200.00
+  ```
 
 - **/history** [`all|stock|crypto|steam`]  
   View the full log of additions and removals.  
@@ -275,7 +275,7 @@ Target: > $200.00
   Removed 10.00 Glove Case at 26-02-04 16:42:29
   ```
 
-This unified command system makes the bot simpler and more flexible—everything works the same way across stocks, crypto, and Steam items! 🚀
+This unified command system makes the bot simpler and more flexible - everything works the same way across stocks, crypto, and Steam items! 🚀
 
 ### Example Portfolio (/portfolio all)
 <img src="assets/bot_example.png" alt="Portfolio Command Example" width="600"/>
