@@ -22,5 +22,4 @@ services:
 
 volumes:
   investingapibot_db_data:
-    external: true
     name: docker_investingapibot_db_data
