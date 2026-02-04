@@ -60,7 +60,7 @@ def portfolio_asset_format(
     growth = ((current_price - buy_price) / buy_price) * 100 if buy_price else Decimal("0")
 
     quantity_formatted = (
-        quantity.quantize(Decimal("0.0000001"))
+        quantity.quantize(Decimal("0.00000000001"))
         if portfolio.asset_type == AssetType.CRYPTO
         else quantity.quantize(Decimal("0.01"))
     )

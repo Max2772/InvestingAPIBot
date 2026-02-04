@@ -25,7 +25,7 @@ Development uses SQLite; production uses PostgreSQL (via Docker).
 
 ### Requirements
 - Python 3.11 (recommended)
-- Running [InvestAPI](https://github.com/Max2772/InvestAPI) (default: `http://127.0.0.1:8000`)
+- Running [InvestAPI](https://github.com/Max2772/InvestAPI) (default: `http://127.0.0.1:8000`/`http://investapi:8000`)
 - Docker + docker-compose (for production PostgreSQL)
 - Telegram Bot Token from [@BotFather](https://t.me/BotFather)
 
@@ -59,69 +59,42 @@ Development uses SQLite; production uses PostgreSQL (via Docker).
    ```
 
 ### Production (Docker)
+
 1. Make sure [InvestAPI](https://github.com/Max2772/InvestAPI) is running and accessible via `API_BASE_URL`.
 
-2. Create `.env` in the project root (update `DATABASE_URL` for PostgreSQL):
+2. Create a `.env` file in the project root and update the PostgreSQL connection settings:
    ```env
    LOG_LEVEL=INFO
    BOT_TOKEN=your_telegram_bot_token
-   API_BASE_URL=http://127.0.0.1:8000
-   DATABASE_URL=postgresql://postgres:your_password@database:5432/investingapibot
-   ASYNC_DATABASE_URL=postgresql+asyncpg://postgres:your_password@database:5432/investingapibot
+   API_BASE_URL=http://investapi:8000
+   DATABASE_URL=postgresql://devserver:your_password@database:5432/investingapibot
+   ASYNC_DATABASE_URL=postgresql+asyncpg://devserver:your_password@database:5432/investingapibot
    MAXIMUM_ALERTS=10
    ALERT_INTERVAL_SECONDS=300
+
+**Notes:**
+
+* Use `API_BASE_URL=http://investapi:8000` instead of `localhost` so the bot can reach the API inside Docker.
+* `database` is the service name of PostgreSQL in your `docker-compose.yml`.
+* Make sure to set a secure password for your database.
+
+3. For production (PostgreSQL) you should create a separate `database.env` file inside the `/docker` folder with the following fields:
+
+   ```env
+   POSTGRES_USER=your_user
+   POSTGRES_PASSWORD=your_password
+   POSTGRES_DB=investingapibot
    ```
 
-   **Note:** `database` is the compose service name. Set a secure password in `.env`.
+   This file will be used by the PostgreSQL container during startup.
 
-3. Start the stack:
+4. Start the stack:
+
    ```bash
    docker compose up --build -d
    ```
 
    The bot will be available in Telegram.
-
-### Dockerfile (production)
-```dockerfile
-FROM python:3.11-slim
-
-WORKDIR /app
-
-COPY requirements/prod/requirements.txt /app/
-RUN pip install --no-cache-dir -r requirements.txt
-
-COPY . /app
-
-CMD ["python", "main.py"]
-```
-
-### docker-compose.yaml (production)
-```yaml
-services:
-  api:
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile
-    container_name: investingapibot
-    env_file:
-      - ../.env
-    depends_on:
-      - database
-    restart: unless-stopped
-
-  database:
-    image: postgres:17-alpine
-    container_name: investingapibot_database
-    volumes:
-      - investingapibot_db_data:/var/lib/postgresql/data
-    env_file:
-      - ../.env
-    ports:
-      - "127.0.0.1:5432:5432"
-
-volumes:
-  investingapibot_db_data:
-```
 
 ## Usage 📝
 
