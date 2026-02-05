@@ -8,7 +8,7 @@ from src.logger import logger
 from src.regex.add_patterns import add_asset_re
 from src.types.response_enums import AssetType
 from src.types.system_types import LocalUser
-from src.utils.api_utils import get_latest_price
+from src.utils.api_utils import get_latest_price, get_api_response
 from src.utils.db_utils import upsert_asset
 from src.utils.formatters import get_asset_name
 from src.utils.tg_utils import validate_amount_and_price
@@ -41,10 +41,13 @@ async def add_cmd_handler(message: Message, user: LocalUser):
         await message.answer("App id must be positive!")
         return
 
-    price = parameter_price or await get_latest_price(asset_type, asset_name, app_id)
-    if price is None:
-        await message.answer(f"Sorry, {asset_name} doesn't exist.")
+
+    latest_price = await get_latest_price(asset_type, asset_name, app_id)
+    if not latest_price:
+        await message.answer(f"Sorry, <b>{asset_name}</b> doesn't exist.")
         return
+
+    price = parameter_price or latest_price
 
     try:
         await upsert_asset(
