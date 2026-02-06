@@ -106,3 +106,4 @@ def extract_user(update: Update) -> Optional[User]:
         return update.chat_join_request.from_user
 
     return None
+
