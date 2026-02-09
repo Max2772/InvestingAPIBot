@@ -19,8 +19,7 @@ async def portfolio_cb_handler(cq: CallbackQuery, callback_data: PortfolioCb, us
 
         portfolio_text = await build_portfolio_text(
             user,
-            mode,
-            cq.message
+            mode
         )
 
         if not portfolio_text:

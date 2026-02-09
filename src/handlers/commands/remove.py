@@ -4,17 +4,17 @@ from aiogram import Router
 from aiogram.filters import Command
 from aiogram.types import Message
 
-from src.dao.models import DbUser
 from src.logger import logger
 from src.regex.remove_patterns import remove_asset_re
 from src.types.response_enums import RemoveAssetResult, AssetType
+from src.types.system_types import LocalUser
 from src.utils.db_utils import remove_asset
 from src.utils.formatters import get_asset_name
 
 REMOVE_ASSET_CMD_ROUTER = Router()
 
 @REMOVE_ASSET_CMD_ROUTER.message(Command("remove"))
-async def remove_cmd_handler(message: Message, user: DbUser):
+async def remove_cmd_handler(message: Message, user: LocalUser):
     match = remove_asset_re.match(message.text.strip())
     if not match:
         await message.answer("Please provide a valid asset and amount, e.g. <code>/remove stock AMD 10</code>")

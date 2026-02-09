@@ -2,17 +2,17 @@ from aiogram import Router
 from aiogram.filters import Command
 from aiogram.types import Message
 
-from src.dao.models import DbUser
 from src.logger import logger
 from src.regex.portfolio_patterns import portfolio_re
 from src.types.response_enums import AssetType
+from src.types.system_types import LocalUser
 from src.utils.handler_utils.portfolio_utils import build_portfolio_text
 
 PORTFOLIO_CMD_ROUTER = Router()
 
 
 @PORTFOLIO_CMD_ROUTER.message(Command("portfolio"))
-async def portfolio_cmd_handler(message: Message, user: DbUser):
+async def portfolio_cmd_handler(message: Message, user: LocalUser):
     try:
         match = portfolio_re.match(message.text.strip())
         if not match:
@@ -23,8 +23,7 @@ async def portfolio_cmd_handler(message: Message, user: DbUser):
 
         portfolio_text = await build_portfolio_text(
             user,
-            mode,
-            message
+            mode
         )
 
         if not portfolio_text:
