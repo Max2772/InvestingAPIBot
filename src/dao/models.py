@@ -85,7 +85,7 @@ class History(Base):
     __tablename__ = "histories"
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     user_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("users.telegram_id"), nullable=False)
-    portfolio_id: Mapped[int] = mapped_column(Integer, ForeignKey("portfolios.id"), nullable=False)
+    portfolio_id: Mapped[int] = mapped_column(Integer, ForeignKey("portfolios.id", ondelete="CASCADE"), nullable=False)
     operation: Mapped[HistoryOperation] = mapped_column(
         Enum(HistoryOperation, name="history_operation_enum"),
         nullable=False
