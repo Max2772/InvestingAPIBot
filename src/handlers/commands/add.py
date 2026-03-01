@@ -63,7 +63,7 @@ async def add_cmd_handler(message: Message, user: LocalUser):
             app_id=app_id
         )
 
-        await message.answer(f"Added <b>{amount} {asset_name}</b> at <b>{price}$</b>")
+        await message.answer(f"Added <b>{amount} {unique_asset_name}</b> at <b>{price}$</b>")
     except Exception as e:
         logger.error(f"Error adding {asset_name}: {e}")
         await message.answer(f"Failed to add {asset_name}")

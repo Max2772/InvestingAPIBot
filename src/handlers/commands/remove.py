@@ -64,7 +64,7 @@ async def remove_cmd_handler(message: Message, user: LocalUser):
             return
         else:
             amount_text = f" {amount}" if amount else ""
-            await message.answer(f"Removed<b>{amount_text} {asset_name}</b> from portfolio.")
+            await message.answer(f"Removed<b>{amount_text} {unique_asset_name}</b> from portfolio.")
 
     except Exception as e:
         logger.error(f"Failed to remove {asset_name}: {e}")
