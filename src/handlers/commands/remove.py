@@ -8,6 +8,7 @@ from src.logger import logger
 from src.regex.remove_patterns import remove_asset_re
 from src.types.response_enums import RemoveAssetResult, AssetType
 from src.types.system_types import LocalUser
+from src.utils.api_utils import get_unique_asset_name
 from src.utils.db_utils import remove_asset
 from src.utils.formatters import get_asset_name
 
@@ -32,11 +33,23 @@ async def remove_cmd_handler(message: Message, user: LocalUser):
     if app_id and app_id <= 0:
         await message.answer("App Id must be positive!")
         return
+
+    unique_asset_name: str = await get_unique_asset_name(
+        asset_type,
+        asset_name,
+        app_id
+    )
+
+    if unique_asset_name is None:
+        await message.answer(f"Sorry, <b>{asset_name}</b> doesn't exist.")
+        return
+
+
     try:
         result: RemoveAssetResult = await remove_asset(
             user.telegram_id,
             asset_type,
-            asset_name,
+            unique_asset_name,
             amount,
             app_id
         )

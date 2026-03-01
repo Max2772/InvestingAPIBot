@@ -1,5 +1,5 @@
 from decimal import Decimal
-from typing import Optional, Union
+from typing import Optional, Union, Tuple
 
 from aiohttp import ClientSession
 
@@ -20,6 +20,7 @@ def get_api_url(
         else f"{API_BASE_URL}/{asset_type.value}/{asset_name}"
     )
 
+
 async def get_api_response(
         asset_type: AssetType,
         asset_name: str,
@@ -38,6 +39,7 @@ async def get_api_response(
         logger.error(f"Error fetching data: {str(e)}")
         return None
 
+
 async def get_latest_price(
         asset_type: AssetType,
         asset_name: str,
@@ -47,3 +49,25 @@ async def get_latest_price(
     if data is None:
         return None
     return Decimal(str(data.get("price", 0.0)))
+
+
+async def get_unique_asset(
+        asset_type: AssetType,
+        asset_name: str,
+        app_id: Optional[int] = None
+) -> Optional[Tuple[str, Decimal]]:
+    data = await get_api_response(asset_type, asset_name, app_id)
+    if data is None:
+        return None
+    return data.get("name"), Decimal(str(data.get("price", 0.0)))
+
+
+async def get_unique_asset_name(
+        asset_type: AssetType,
+        asset_name: str,
+        app_id: Optional[int] = None
+) -> Optional[str]:
+    data = await get_api_response(asset_type, asset_name, app_id)
+    if data is None or data.get("name") is None:
+        return None
+    return data["name"]
