@@ -5,6 +5,7 @@ from urllib.parse import unquote
 from src.dao.models import Portfolio
 from src.types.response_enums import AssetType
 
+
 def get_asset_name(
         raw_name: str,
         asset_type: AssetType
@@ -13,7 +14,8 @@ def get_asset_name(
         unquote(raw_name)
         if asset_type == AssetType.STEAM
         else raw_name.upper()
-)
+    )
+
 
 def format_growth(value: Decimal) -> str:
     sign = "+" if value > 0 else ""
@@ -28,6 +30,7 @@ def loading_bar_text(
     percent = int(step / total_steps * 100)
     bar = "█" * (percent // 10) + "░" * (10 - percent // 10)
     return f"Loading {percent}%\n[{bar}]"
+
 
 def total_portfolio_stats(
         total_old_value: Decimal,
@@ -47,9 +50,10 @@ def total_portfolio_stats(
 
     return separator + stats
 
+
 def portfolio_asset_format(
-    portfolio: Portfolio,
-    current_price: Decimal
+        portfolio: Portfolio,
+        current_price: Decimal
 ) -> tuple[str, Decimal, Decimal]:
     buy_price = portfolio.buy_price
     quantity = portfolio.quantity
@@ -58,12 +62,7 @@ def portfolio_asset_format(
     new_value = current_price * quantity
 
     growth = ((current_price - buy_price) / buy_price) * 100 if buy_price else Decimal("0")
-
-    quantity_formatted = (
-        quantity.quantize(Decimal("0.00000000001"))
-        if portfolio.asset_type == AssetType.CRYPTO
-        else quantity.quantize(Decimal("0.01"))
-    )
+    quantity_formatted = format_quantity(quantity, portfolio.asset_type)
 
     text = (
         f"<b>{portfolio.asset_name}</b>: {quantity_formatted} "
@@ -72,6 +71,18 @@ def portfolio_asset_format(
     )
 
     return text, old_value, new_value
+
+
+def format_quantity(quantity: Decimal, asset_type: AssetType) -> str:
+    if asset_type == AssetType.CRYPTO:
+        s = str(quantity.quantize(Decimal("0.00000001"))).rstrip('0').rstrip('.')
+        if '.' not in s:
+            s += '.0'
+        return s
+
+    else:
+        return str(quantity.quantize(Decimal("0.01")))
+
 
 def format_alert_triggered(
         asset_name: str,
@@ -89,6 +100,7 @@ def format_alert_triggered(
     )
 
     return message
+
 
 def get_plain_name(user) -> str:
     if user.username:

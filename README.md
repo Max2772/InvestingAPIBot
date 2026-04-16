@@ -278,6 +278,14 @@ The bot uses `aiogram` for async Telegram handling. It fetches prices from Inves
 - `alerts` — price alerts
 - `history` — all additions/removals
 
+### Database Migrations
+
+Database migrations are handled with **Alembic**.
+
+When running migrations locally, make sure the database host is set to `localhost`.
+For Docker/production, adjust the database host manually (e.g. `database`) before applying migrations.
+
+
 ## License 📜 
 
 This project is licensed under the MIT License. See the [License](LICENSE) file for details.

@@ -46,4 +46,4 @@ async def get_latest_price(
     data = await get_api_response(asset_type, asset_name, app_id)
     if data is None:
         return None
-    return Decimal(str(data.get("price", 0.0)))
+    return Decimal(str(data.get("price", "0.0")))
