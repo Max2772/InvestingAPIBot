@@ -55,10 +55,10 @@ async def get_unique_asset(
         asset_type: AssetType,
         asset_name: str,
         app_id: Optional[int] = None
-) -> Optional[Tuple[str, Decimal]]:
+) -> Tuple[str, Decimal] | Tuple[None, None]:
     data = await get_api_response(asset_type, asset_name, app_id)
     if data is None:
-        return None
+        return None, None
     return data.get("name"), Decimal(str(data.get("price", 0.0)))
 
 
