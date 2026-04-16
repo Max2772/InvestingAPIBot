@@ -93,16 +93,19 @@ async def remove_asset(
             )
         )
 
-        asset: Portfolio = result.scalar_one_or_none()
+        asset = result.scalar_one_or_none()
         if not asset:
             return RemoveAssetResult.ASSET_NOT_FOUND
 
-        if amount and asset.quantity < amount:
+        removed_quantity = amount if amount is not None else asset.quantity
+
+        if removed_quantity > asset.quantity:
             return RemoveAssetResult.NOT_ENOUGH
-        if amount is None or asset.quantity == amount:
+
+        if removed_quantity == asset.quantity:
             await session.delete(asset)
         else:
-            asset.quantity -= amount
+            asset.quantity -= removed_quantity
 
         history = History(
             user_id=user_id,
